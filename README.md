@@ -824,21 +824,43 @@ print(f"Average RTT: {avg_rtt:.1f}ms")
 ## 🏗️ Architecture
 
 ```
-tracemap_tui/
-├── cli.py          # Typer-based CLI (trace, replay, export, diff, stats)
-├── models.py       # Pydantic models (Hop, TraceRun, TraceMeta)
-├── trace.py        # Traceroute execution and parsing
-├── geo.py          # GeoIP locators (Mock, MaxMind, enhanced with ASN)
-├── asn.py          # ASN resolvers (Team Cymru, PyASN)
-├── dns.py          # Reverse DNS lookup with caching
-├── render.py       # ASCII/Braille map rendering + Rich tables
-├── tui/
-│   ├── app.py      # Main Textual app
-│   └── __init__.py
-└── export/
-    ├── html.py     # Leaflet.js HTML generator
-    ├── svg.py      # SVG renderer
-    └── __init__.py
+src/tracemap/
+├── cli.py              # Typer CLI (trace, watch, cache, export, diff, stats)
+├── models.py           # Pydantic models (Hop, TraceRun, TraceMeta)
+├── trace.py            # Traceroute execution & parsing
+├── geo.py              # GeoIP locators (Mock, MaxMind)
+├── geo_api.py          # API geo locators (ip-api, ipapi.co) with cache
+├── asn.py              # ASN resolvers (Team Cymru, PyASN)
+├── dns.py              # Reverse DNS lookup with caching
+├── render.py           # ASCII/tables rendering
+├── profiles.py         # Privacy/offline profiles ⚡ NEW v0.3.0
+│
+├── cache/              # Persistent caching (SQLite) ⚡ NEW v0.3.0
+│   ├── __init__.py
+│   └── sqlite.py       # 30d/90d/24h TTLs
+│
+├── watch/              # Continuous monitoring ⚡ NEW v0.3.0
+│   ├── __init__.py
+│   ├── monitor.py      # TraceMonitor with rolling stats
+│   └── alerts.py       # Anomaly detection
+│
+├── tui/                # Interactive TUI (Textual)
+│   ├── __init__.py
+│   └── app.py          # TraceMapApp widget
+│
+├── export/             # Export formats
+│   ├── __init__.py
+│   ├── html.py         # Leaflet.js interactive maps
+│   ├── svg.py          # SVG static diagrams
+│   └── markdown.py     # Incident reports ⚡ NEW v0.3.0
+│
+├── analysis/           # Confidence scoring ⚡ NEW v0.3.0
+│   ├── __init__.py
+│   └── confidence.py   # Geo confidence & plausibility checks
+│
+└── probing/            # Advanced probing ⚡ NEW v0.3.0
+    ├── __init__.py
+    └── paris.py        # Paris traceroute & ECMP detection
 ```
 
 ### Key Design Principles
