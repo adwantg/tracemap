@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Ruff
+.ruff_cache/
+
+# Project-specific
+.tracemap/
+*.tracemap/
+watch_*.jsonl
+cache.sqlite
+cache.sqlite-journal
+
+# Logs  
+*.log
+
+# Temp files
+*.tmp
+*.bak
+.*.swp
+
+# Output files (examples/testing)
+trace.json
+trace.html
+trace.svg
+trace.md
+mytrace.*
+test_*.json
+test_*.html
+
+# Documentation builds
+docs/_build/
+site/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Artifacts directory (Antigravity brain)
+.gemini/
+
+# Local development/internal files
+TODO.md
+NOTES.md
+.env
+.env.local
+scripts/debug*.py
+scripts/test*.py
