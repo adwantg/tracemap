@@ -83,7 +83,23 @@ site/
 .AppleDouble
 .LSOverride
 
-# Artifacts directory (Antigravity brain)
+# Internal documentation (keep only README.md for open source)
+*.md
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+
+# Internal project files
+CODEBASE_AUDIT.md
+CLUSTERING.md
+CHANGELOG.md
+ROADMAP.md
+TIMEOUT_IMPROVEMENTS.md
+UX_IMPROVEMENTS.md
+REAL_GEO_DATA.md
+ux_analysis.md
+
+# Artifacts directory (Antigravity brain - development only)
 .gemini/
 
 # Local development/internal files
@@ -93,3 +109,5 @@ NOTES.md
 .env.local
 scripts/debug*.py
 scripts/test*.py
+codacy_issues.json
+
