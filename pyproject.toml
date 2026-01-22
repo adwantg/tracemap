@@ -1,0 +1,98 @@
+[build-system]
+requires = ["hatchling>=1.22"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tracemap"
+version = "0.2.0"
+description = "Modern traceroute visualizer for the terminal with TUI, interactive HTML maps, and ASN/GeoIP lookups."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Goutam Adwant", email = "workwithgoutam@gmail.com"}]
+keywords = [
+    "traceroute",
+    "networking",
+    "tui",
+    "ascii",
+    "geoip",
+    "debugging",
+    "visualization",
+    "network-tools",
+    "latency",
+    "mtr",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet",
+    "Topic :: System :: Networking",
+    "Topic :: Utilities",
+]
+
+dependencies = [
+    "rich>=13.7.0",
+    "typer>=0.12.3",
+    "pydantic>=2.5.0",
+    "textual>=0.50.0",
+]
+
+[project.optional-dependencies]
+geoip = [
+    "maxminddb>=2.6.0",
+]
+asn = [
+    "pyasn>=1.6.1",
+    "dnspython>=2.4.0",
+]
+all = [
+    "maxminddb>=2.6.0",
+    "pyasn>=1.6.1",
+    "dnspython>=2.4.0",
+]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.6.0",
+    "mypy>=1.10.0",
+    "types-setuptools",
+]
+
+[project.scripts]
+tracemap = "tracemap.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/adwantg/tracemap"
+Repository = "https://github.com/adwantg/tracemap"
+Issues = "https://github.com/adwantg/tracemap/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tracemap"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.mypy]
+python_version = "3.10"
+strict = false
+warn_return_any = true
+warn_unused_ignores = true
