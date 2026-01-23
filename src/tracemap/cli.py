@@ -113,17 +113,17 @@ def doctor() -> None:
     console.print(f"[green]✓ traceroute found:[/green] {bin_path}")
 
     # Check GeoIP
-    mmdb = os.environ.get("TRACEMAP_GEOIP_MMDB")
-    if mmdb:
-        p = Path(mmdb)
-        console.print(f"  TRACEMAP_GEOIP_MMDB={p}")
-        if p.exists():
-            console.print("[green]✓ GeoIP mmdb exists[/green]")
-        else:
-            console.print("[yellow]✗ GeoIP mmdb file not found[/yellow]")
+    mmdb_env = os.environ.get("TRACEMAP_GEOIP_MMDB")
+    mmdb_path: Optional[Path] = Path(mmdb_env) if mmdb_env else None
+
+    if mmdb_path and mmdb_path.exists():
+        console.print(f"[green]✓ GeoIP database (TRACEMAP_GEOIP_MMDB):[/green] {mmdb_path}")
+    elif mmdb_path and not mmdb_path.exists():
+        console.print(f"[yellow]✗ GeoIP database (TRACEMAP_GEOIP_MMDB) not found:[/yellow] {mmdb_path}")
     else:
-        console.print("[yellow]  GeoIP not configured; will use MockGeoLocator.[/yellow]")
-        console.print("  Set TRACEMAP_GEOIP_MMDB=/path/to/GeoLite2-City.mmdb for real locations.")
+        console.print("[yellow]  GeoIP MMDB not configured (optional)[/yellow]")
+        console.print("[dim]  Strategy: API lookups (ip-api → ipapi.co) → mock fallback[/dim]")
+        console.print("[dim]  For offline: export TRACEMAP_GEOIP_MMDB=/path/to/GeoLite2-City.mmdb[/dim]")
 
     # Check ASN database
     asn_db = Path.home() / ".tracemap" / "asn.dat"
@@ -236,12 +236,19 @@ def trace(
             # Would integrate Paris-specific tracing here
             # For now, proceed with standard trace + ECMP detection
 
+    # Determine if DNS should be used
+    resolve_hostnames = True
+    if profile:
+        prof = get_profile(profile)
+        resolve_hostnames = prof.use_dns
+    
     cfg = TraceConfig(
         host=host,
         max_hops=max_hops,
         timeout_s=timeout_s,
         probes=probes,
         protocol=proto,
+        resolve_hostnames=resolve_hostnames,
     )
 
     # Use ASCII map mode if requested, otherwise use clean table mode

@@ -1,4 +1,4 @@
-# Traceroute Map TUI 🗺️
+# tracemap 🗺️
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -8,7 +8,24 @@
 
 Table-first output like MTR, with replay/diff workflows for SREs, and beautiful HTML exports for incident reports.
 
-> ⚠️ **Demo screenshots coming soon!** See [QUICKSTART.md](QUICKSTART.md) for real examples.
+## 📸 Screenshots
+
+### Interactive HTML Map Export
+![HTML Map - Interactive Leaflet.js with hop markers and RTT color coding](docs/screenshots/html_map.png)
+
+### Terminal TUI
+![TUI Interface - Live terminal UI with map, hop table, and metadata](docs/screenshots/tui.png)
+
+---
+
+## 📋 Prerequisites
+
+- **OS**: macOS or Linux (Windows not supported)
+- **Required**: System `traceroute` binary
+- **Python**: 3.10 or newer
+- **Privileges**: Some operations may require `sudo`/root
+
+> **Privacy Note**: By default, tracemap queries external GeoIP providers (ip-api.com, ipapi.co) for accurate location data. Use `--profile private` or `--no-api` for fully offline operation with no external calls.
 
 ---
 
@@ -330,21 +347,26 @@ tracemap doctor
 
 ### Default Terminal Output (Table - Recommended)
 
-The default `tracemap trace` command now shows a clean, MTR-style table:
+The default `tracemap trace` command shows a clean, MTR-style table:
 
-```bash
-tracemap trace google.com
-
-# ╭───┬───────────────┬──────────────────┬────────┬──────┬─────────────────┬──────────────╮
-# │ # │ IP            │ Hostname         │ Avg RTT│ Loss │ ASN             │ Geo          │
-# ├───┼───────────────┼──────────────────┼────────┼──────┼─────────────────┼──────────────┤
-# │  1│ 10.0.0.1      │ router.local     │  3.2 ms│   0% │                 │              │
-# │  2│ 68.85.101.1   │ po-311-ar01...   │ 12.0 ms│   0% │ AS7922 (Comcast)│ San Jose, US │
-# │  3│ 162.151.86.57 │ be-298-ar01...   │ 21.3 ms│   0% │ AS7922 (Comcast)│ Santa Maria  │
-# ...
-# │  9│ 142.251.46.238│ sfo03s42-gw...   │ 18.7 ms│   0% │ AS15169 (Google)│ San Fran, US │
-# ╰───┴───────────────┴──────────────────┴────────┴──────┴───────────────── ┴──────────────╯
 ```
+$ tracemap trace google.com
+
+╭────┬──────────────────┬─────────────────┬─────────┬──────┬──────────────┬─────────────╮
+│ #  │ IP               │ Hostname        │ Avg RTT │ Loss │ ASN          │ Location    │
+├────┼──────────────────┼─────────────────┼─────────┼──────┼──────────────┼─────────────┤
+│  1 │ 192.168.1.1      │ gateway.local   │   2.1ms │   0% │              │             │
+│  2 │ 10.50.1.1        │                 │  12.3ms │   0% │              │             │
+│  3 │ 68.85.101.5      │ be-301-ar01.oak │  15.7ms │   0% │ AS7922       │ Oakland, US │
+│  4 │ 162.151.86.57    │ be-298-ar01.plk │  22.4ms │   0% │ AS7922       │ San Jose    │
+│  5 │ 142.251.65.142   │ 142.251.65.142  │  18.9ms │   0% │ AS15169      │ MTV, US     │
+╰────┴──────────────────┴─────────────────┴─────────┴──────┴──────────────┴─────────────╯
+
+✓ Saved: .tracemap/trace.json
+✓ Saved: .tracemap/trace.html
+```
+
+Clean, actionable output—no endless `* * *` rows.
 
 ### ASCII World Map (Optional - use `--ascii-map`)
 
@@ -446,9 +468,11 @@ q: Quit | ↑/↓: Navigate | Enter: Details | e: Export HTML
 
 ---
 
-## 🆕 New in v0.3.0
+## 🆕 New in v0.3.0 (✅ All Implemented)
 
-### Persistent Caching (3-4x Faster)
+> **Status Legend**: ✅ Implemented | 🧪 Experimental | 🧭 Planned
+
+### Persistent Caching (3-4x Faster) ✅
 Never hit API rate limits again! SQLite-based caching with automatic TTLs:
 
 ```bash
@@ -466,7 +490,7 @@ Valid entries: 239
 
 **TTLs**: GeoIP 30d, ASN 90d, DNS 24h
 
-### Watch Mode (MTR Parity)
+### Watch Mode (MTR Parity) ✅
 Continuous monitoring with anomaly detection:
 
 ```bash
@@ -487,7 +511,7 @@ $ tracemap watch google.com --interval 30
 - Packet loss >5%
 - Path instability
 
-### Privacy & Offline Profiles
+### Privacy & Offline Profiles ✅
 Preset configurations for different use cases:
 
 ```bash
@@ -507,7 +531,7 @@ $ tracemap trace --profile fast google.com
 $ tracemap trace --profile default google.com
 ```
 
-### Paris Traceroute & ECMP Detection
+### Paris Traceroute & ECMP Detection ✅
 Detect load-balanced paths that traditional traceroute misses:
 
 ```bash
@@ -527,7 +551,7 @@ $ tracemap trace --discover-paths google.com
 $ tracemap trace --paris google.com
 ```
 
-### Confidence Scoring
+### Confidence Scoring ✅
 Know how trustworthy your geo data is:
 
 ```markdown
@@ -542,7 +566,7 @@ Know how trustworthy your geo data is:
 - Ocean crossing detection
 - Anycast/VPN detection
 
-### Markdown Export (Incident Reports)
+### Markdown Export (Incident Reports) ✅
 Generate clean markdown for tickets:
 
 ```bash
@@ -680,7 +704,7 @@ Traces are saved in a structured JSON format for easy processing:
 {
   "meta": {
     "tool": "tracemap",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "host": "google.com",
     "resolved_ip": "142.250.185.46",
     "protocol": "udp",
@@ -714,9 +738,6 @@ Traces are saved in a structured JSON format for easy processing:
   ]
 }
 ```
-
-```
-
 ---
 
 ## 🎯 Technical Improvements & UX
@@ -799,8 +820,8 @@ tracemap trace firewalled.example.com
 ```python
 from pathlib import Path
 import json
-from tracemap_tui.models import TraceRun
-from tracemap_tui.export.html import export_html
+from tracemap.models import TraceRun
+from tracemap.export.html import export_html
 
 # Load trace
 data = json.loads(Path(".tracemap/trace.json").read_text())
@@ -875,14 +896,28 @@ src/tracemap/
 
 ## 🤝 Contributing
 
-Contributions welcome! Areas for improvement:
+Contributions welcome! Priority areas:
 
+**High Impact:**
 - [ ] Windows support (tracert parsing)
-- [ ] ECMP hop clustering visualization
-- [ ] `tracemap watch` for continuous monitoring
-- [ ] Config file support (~/.tracemaprc)
-- [ ] Shell completions (bash, zsh, fish)
+- [ ] Config file support (`~/.config/tracemap/config.toml`)
+- [ ] Multi-resolver DNS (parallel lookups)
 - [ ] Animated GIF export
+- [ ] Shell completions (bash, zsh, fish)
+
+**Advanced Features:**
+- [ ] Multi-path visualization (display all ECMP paths in TUI)
+- [ ] Continuous integration for route monitoring
+- [ ] Source IP binding (`--source` flag)
+- [ ] Custom probe payloads
+
+**Already Implemented** (v0.3.0):
+- ✅ Watch mode for continuous monitoring
+- ✅ ECMP detection via Paris traceroute
+- ✅ Persistent caching
+- ✅ Privacy profiles
+
+See [ROADMAP.md](ROADMAP.md) for full development plan.
 
 ---
 
