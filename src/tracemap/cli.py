@@ -167,7 +167,10 @@ def trace(
     show_map: bool = typer.Option(False, "--ascii-map", help="Show ASCII world map (use HTML export instead)"),
     profile: Optional[str] = typer.Option(None, "--profile", help="Use preset profile: default, offline, private, fast"),
     paris: bool = typer.Option(False, "--paris", help="Use Paris traceroute for ECMP-aware probing"),
-    discover_paths: bool = typer.Option(False, "--discover-paths", help="Discover multiple ECMP paths (slower)")
+    discover_paths: bool = typer.Option(False, "--discover-paths", help="Discover multiple ECMP paths (slower)"),
+    dns_debug: bool = typer.Option(False, "--dns-debug", help="Check multiple DNS resolvers for consistency"),
+    source_interface: Optional[str] = typer.Option(None, "--bind", "-b", help="Bind to specific interface (e.g., eth0)"),
+    source_port: Optional[int] = typer.Option(None, "--source-port", help="Bind to specific source port"),
 ) -> None:
     """
     Run traceroute and display hop information in a clean table.
@@ -177,6 +180,15 @@ def trace(
     For best visualization, use the auto-generated HTML export.
     """
     out.parent.mkdir(parents=True, exist_ok=True)
+
+    # DNS Debug Mode
+    if dns_debug:
+        from .analysis.dns_debug import check_dns_consistency
+        console.print(f"[bold]DNS Consistency Check:[/bold] {host}")
+        check_dns_consistency(host, console)
+        # Continue with trace... or maybe we should return? 
+        # Roadmap implies it's a flag for trace command so we continue.
+        console.print()
     
     # Apply profile settings if specified
     if profile:
@@ -235,6 +247,8 @@ def trace(
             console.print("[cyan]Using Paris traceroute (ECMP-aware)[/cyan]")
             # Would integrate Paris-specific tracing here
             # For now, proceed with standard trace + ECMP detection
+            # Note: In a real implementation we would modify run_traceroute to use ParisProber
+            # But based on the gap analysis, we are just hooking up the plumbing for now.
 
     # Determine if DNS should be used
     resolve_hostnames = True
@@ -249,7 +263,13 @@ def trace(
         probes=probes,
         protocol=proto,
         resolve_hostnames=resolve_hostnames,
+        # TODO: Add source binding to TraceConfig
     )
+    # Monkey-patch config for now until we update TraceConfig model
+    if source_interface:
+        cfg.source_interface = source_interface
+    if source_port:
+        cfg.source_port = source_port
 
     # Use ASCII map mode if requested, otherwise use clean table mode
     trace_result = run_traceroute(cfg, geoloc, live_render=not no_live, render_map=show_map)
@@ -324,10 +344,11 @@ def tui(
 @app.command()
 def export(
     trace_json: Path = typer.Argument(..., help="Path to trace JSON"),
-    format: str = typer.Option("html", "--format", "-f", help="Export format: html, svg"),
+    format: str = typer.Option("html", "--format", "-f", help="Export format: html, svg, md, bundle"),
     out: Optional[Path] = typer.Option(None, "--out", "-o", help="Output file path"),
+    bundle: bool = typer.Option(False, "--bundle", help="Create a ZIP bundle with all formats"),
 ) -> None:
-    """Export trace visualization to HTML or SVG."""
+    """Export trace visualization to HTML, SVG, Markdown, or ZIP bundle."""
     if not trace_json.exists():
         console.print(f"[red]File not found:[/red] {trace_json}")
         raise typer.Exit(code=1)
@@ -335,9 +356,14 @@ def export(
     data = json.loads(trace_json.read_text(encoding="utf-8"))
     trace_result = TraceRun.model_validate(data)
 
+    # Handle bundle shortcut
+    if bundle or format == "bundle":
+        format = "bundle"
+
     # Default output path
     if out is None:
-        out = trace_json.with_suffix(f".{format}")
+        ext = "zip" if format == "bundle" else format
+        out = trace_json.with_suffix(f".{ext}")
 
     if format.lower() == "html":
         try:
@@ -365,10 +391,19 @@ def export(
         except ImportError:
             console.print("[yellow]Markdown export module not available[/yellow]")
             raise typer.Exit(code=1)
+            
+    elif format.lower() == "bundle":
+        try:
+            from .export.bundle import export_bundle
+            export_bundle(trace_result, out)
+            console.print(f"[green]Exported Bundle:[/green] {out}")
+        except ImportError:
+            console.print("[yellow]Bundle export module not available[/yellow]")
+            raise typer.Exit(code=1)
 
     else:
         console.print(f"[red]Unknown format:[/red] {format}")
-        console.print("Supported formats: html, svg, markdown")
+        console.print("Supported formats: html, svg, markdown, bundle")
         raise typer.Exit(code=1)
 
 
@@ -504,6 +539,7 @@ def _redact_trace(trace: TraceRun) -> TraceRun:
         hop["hostname"] = None  # Remove hostnames too
 
     return TraceRun.model_validate(data)
+
 
 
 @app.command()
