@@ -21,9 +21,27 @@ Table-first output like MTR, with replay/diff workflows for SREs, and beautiful 
 ## 📋 Prerequisites
 
 - **OS**: macOS or Linux (Windows not supported)
-- **Required**: System `traceroute` binary
 - **Python**: 3.10 or newer
-- **Privileges**: Some operations may require `sudo`/root
+- **Required Binary**: System `traceroute` must be installed
+  - **macOS**: Included by default
+  - **Linux**: Install via `sudo apt install traceroute` (Ubuntu/Debian) or `sudo yum install traceroute` (RHEL/CentOS)
+
+### 🔑 Permissions & `sudo` Requirements
+
+Tracemap uses the system `traceroute` binary, which often requires `root` privileges for certain probe types:
+
+| Protocol | Flag | Privileges Required? | Notes |
+|----------|------|----------------------|-------|
+| **UDP** | Default | **No** (usually) | Standard `traceroute` on macOS/Linux works without root for UDP. |
+| **ICMP** | `-P icmp` | **Yes** (`sudo`) | Creating raw ICMP sockets requires root. |
+| **TCP** | `-P tcp` | **Yes** (`sudo`) | Creating raw TCP SYN packets requires root. |
+| **Paris** | `--paris` | **No** (usually) | Uses UDP with fixed ports; similar requirements to default UDP. |
+
+**Recommendation**: Verification commands (like `doctor`) run fine as a normal user. For advanced tracing (ICMP/TCP), run with `sudo`:
+
+```bash
+sudo tracemap trace google.com --protocol icmp
+```
 
 > **Privacy Note**: By default, tracemap queries external GeoIP providers (ip-api.com, ipapi.co) for accurate location data. Use `--profile private` or `--no-api` for fully offline operation with no external calls.
 
