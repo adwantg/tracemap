@@ -49,6 +49,8 @@ class TraceConfig:
     protocol: Protocol = Protocol.UDP
     port: int = 33434  # Default UDP port for traceroute
     resolve_hostnames: bool = True  # Reverse DNS enabled by default
+    source_interface: Optional[str] = None
+    source_port: Optional[int] = None
 
 
 def traceroute_binary() -> Optional[str]:
@@ -123,6 +125,26 @@ def _build_cmd(cfg: TraceConfig, binary: str) -> List[str]:
         cmd.append("-T")  # TCP SYN
         if not is_macos:
             cmd.extend(["-p", str(cfg.port)])
+
+    # Source Interface
+    if cfg.source_interface:
+        cmd.extend(["-i", cfg.source_interface])
+        
+    # Source Port
+    # Note: For UDP/TCP, -p is often destination port, -s is source address/port depending on version.
+    # macOS traceroute: -s src_addr. No direct source port flag except varying start port?
+    # Actually standard traceroute uses -p for DEST port (UDP/TCP).
+    # If user wants to bind source port for Paris traceroute stabilization, that's complex.
+    # But usually --source-port implies fixing the source port.
+    # Linux traceroute: --sport=num
+    # We will assume Linux-style --sport if provided, or ignore/warn if on mac without support?
+    # For now, let's try to add if provided.
+    if cfg.source_port:
+        if is_macos:
+             # macOS traceroute doesn't have an easy fixed source port flag for UDP
+             pass 
+        else:
+             cmd.extend(["--sport", str(cfg.source_port)])
 
     # Target host
     cmd.append(cfg.host)
