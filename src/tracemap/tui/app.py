@@ -3,25 +3,25 @@ Main Textual TUI application for tracemap.
 
 Provides an interactive terminal interface with:
 - World map panel with hop visualization
-- Hop table with RTT, loss, ASN information  
+- Hop table with RTT, loss, ASN information
 - Summary panel with alerts and statistics
 - Keyboard navigation and real-time updates
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 from typing import Optional
 
-from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Container, Horizontal, Vertical
+from textual.containers import Container
 from textual.reactive import reactive
 from textual.widgets import DataTable, Footer, Header, Static
 
 from ..models import Hop, TraceRun
-from ..render import render_static, MapConfig
+from ..render import MapConfig, render_static
 
 
 class MapPanel(Static):
@@ -67,7 +67,7 @@ class SummaryPanel(Static):
             return
 
         lines = []
-        
+
         # selected hop details (if any)
         if self.selected_hop:
             hop = self.selected_hop
@@ -75,16 +75,18 @@ class SummaryPanel(Static):
             lines.append(f"[bold]IP:[/bold] {hop.display_ip}")
             if hop.hostname:
                 lines.append(f"[bold]Host:[/bold] {hop.hostname}")
-            
+
             geo = hop.display_geo or "Unknown"
             lines.append(f"[bold]Loc:[/bold] {geo}")
-            
+
             if hop.display_asn:
                 lines.append(f"[bold]ASN:[/bold] {hop.display_asn}")
-                
+
             if hop.rtt_avg_ms:
-                lines.append(f"[bold]RTT:[/bold] {hop.rtt_avg_ms:.1f}ms (range: {hop.rtt_min_ms:.1f}-{hop.rtt_max_ms:.1f})")
-            
+                lines.append(
+                    f"[bold]RTT:[/bold] {hop.rtt_avg_ms:.1f}ms (range: {hop.rtt_min_ms:.1f}-{hop.rtt_max_ms:.1f})"
+                )
+
             lines.append("")
             lines.append("[dim]────────────────────────────────[/dim]")
             lines.append("")
@@ -165,8 +167,8 @@ class TraceMapApp(App):
         background: white;
         color: black;
     }
-    .high-contrast #map-panel, 
-    .high-contrast #hop-table-container, 
+    .high-contrast #map-panel,
+    .high-contrast #hop-table-container,
     .high-contrast #summary-panel {
         border: solid black;
         background: white;
@@ -243,6 +245,7 @@ class TraceMapApp(App):
 
         try:
             from pathlib import Path
+
             from ..export.html import export_html
 
             output_path = Path(".tracemap/trace.html")
@@ -251,7 +254,7 @@ class TraceMapApp(App):
             self.notify(f"Exported to {output_path}", severity="information")
         except Exception as e:
             self.notify(f"Export failed: {e}", severity="error")
-    
+
     def action_toggle_contrast(self) -> None:
         """Toggle high contrast mode."""
         self.screen.toggle_class("high-contrast")
@@ -261,7 +264,7 @@ class TraceMapApp(App):
         """Show details for selected hop in persistent pane."""
         hop_table = self.query_one(HopTable)
         summary_panel = self.query_one(SummaryPanel)
-        
+
         if hop_table.cursor_row is not None and self.trace:
             idx = hop_table.cursor_row
             if 0 <= idx < len(self.trace.hops):
@@ -346,172 +349,6 @@ class HopTable(DataTable):
             row.append(hop.display_geo[:20] if hop.display_geo else "")
 
             self.add_row(*row)
-
-
-class TraceMapApp(App):
-    """Main tracemap TUI application."""
-
-    TITLE = "Tracemap TUI"
-    CSS = """
-    Screen {
-        layout: grid;
-        grid-size: 2 2;
-        grid-columns: 2fr 1fr;
-        grid-rows: 2fr 1fr;
-    }
-
-    #map-panel {
-        column-span: 1;
-        row-span: 1;
-        border: round #444;
-        background: $surface;
-        padding: 0 1;
-    }
-
-    #hop-table-container {
-        column-span: 1;
-        row-span: 2;
-        border: round #444;
-        background: $surface;
-    }
-
-    #summary-panel {
-        column-span: 1;
-        row-span: 1;
-        border: round #444;
-        background: $surface;
-        padding: 1;
-    }
-
-    HopTable {
-        height: 100%;
-    }
-
-    MapPanel {
-        height: 100%;
-        overflow: auto;
-    }
-
-    SummaryPanel {
-        height: 100%;
-        overflow: auto;
-    }
-
-    .rtt-low { color: $success; }
-    .rtt-med { color: $warning; }
-    .rtt-high { color: $error; }
-    .timeout { color: $text-muted; }
-    """
-
-    BINDINGS = [
-        Binding("q", "quit", "Quit"),
-        Binding("r", "refresh", "Refresh"),
-        Binding("e", "export", "Export HTML"),
-        Binding("j", "cursor_down", "Down", show=False),
-        Binding("k", "cursor_up", "Up", show=False),
-        Binding("enter", "show_details", "Details"),
-    ]
-
-    trace: reactive[Optional[TraceRun]] = reactive(None)
-
-    def __init__(self, trace: Optional[TraceRun] = None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._initial_trace = trace
-
-    def compose(self) -> ComposeResult:
-        """Create child widgets."""
-        yield Header()
-
-        yield MapPanel(id="map-panel")
-        yield Container(HopTable(id="hop-table"), id="hop-table-container")
-        yield SummaryPanel(id="summary-panel")
-
-        yield Footer()
-
-    def on_mount(self) -> None:
-        """Called when app is mounted."""
-        # Set border titles
-        self.query_one("#hop-table-container").border_title = "Hop Details"
-
-        if self._initial_trace:
-            self.trace = self._initial_trace
-
-    def watch_trace(self, trace: Optional[TraceRun]) -> None:
-        """Update all panels when trace changes."""
-        if not trace:
-            return
-
-        # Update map
-        map_panel = self.query_one(MapPanel)
-        map_panel.trace = trace
-
-        # Update summary
-        summary_panel = self.query_one(SummaryPanel)
-        summary_panel.trace = trace
-
-        # Update hop table
-        hop_table = self.query_one(HopTable)
-        hop_table.update_hops(trace.hops)
-
-    def action_refresh(self) -> None:
-        """Refresh the display."""
-        if self.trace:
-            self.watch_trace(self.trace)
-
-    def action_export(self) -> None:
-        """Export trace to HTML."""
-        if not self.trace:
-            self.notify("No trace to export", severity="warning")
-            return
-
-        try:
-            from pathlib import Path
-            from ..export.html import export_html
-
-            output_path = Path(".tracemap/trace.html")
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            export_html(self.trace, output_path)
-            self.notify(f"Exported to {output_path}", severity="information")
-        except Exception as e:
-            self.notify(f"Export failed: {e}", severity="error")
-
-    def action_show_details(self) -> None:
-        """Show details for selected hop."""
-        hop_table = self.query_one(HopTable)
-        if hop_table.cursor_row is not None and self.trace:
-            idx = hop_table.cursor_row
-            if 0 <= idx < len(self.trace.hops):
-                hop = self.trace.hops[idx]
-                self._show_hop_details(hop)
-
-    def _show_hop_details(self, hop: Hop) -> None:
-        """Display hop details notification."""
-        lines = [
-            f"Hop {hop.hop}: {hop.display_ip}",
-        ]
-        if hop.hostname:
-            lines.append(f"Hostname: {hop.hostname}")
-        if hop.rtt_avg_ms:
-            lines.append(f"RTT: {hop.rtt_avg_ms:.1f}ms (min: {hop.rtt_min_ms:.1f}, max: {hop.rtt_max_ms:.1f})")
-        if hop.jitter_ms:
-            lines.append(f"Jitter: {hop.jitter_ms:.2f}ms")
-        lines.append(f"Loss: {hop.loss_pct:.0f}%")
-        if hop.display_geo:
-            lines.append(f"Location: {hop.display_geo}")
-        if hop.display_asn:
-            lines.append(f"ASN: {hop.display_asn}")
-
-        self.notify("\n".join(lines), title=f"Hop {hop.hop} Details", timeout=10)
-
-    def update_trace(self, trace: TraceRun) -> None:
-        """Update the trace data (for live updates)."""
-        self.trace = trace
-
-
-def run_tui(trace: Optional[TraceRun] = None) -> None:
-    """Run the TUI application."""
-    app = TraceMapApp(trace=trace)
-    app.run()
 
 
 if __name__ == "__main__":

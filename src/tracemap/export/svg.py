@@ -9,40 +9,127 @@ Generates a static SVG image with:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import math
 from pathlib import Path
 from typing import List, Tuple
 
-from ..models import TraceRun, Hop
+from ..models import Hop, TraceRun
 
 # Simple world map outline for SVG (more detailed than ASCII version)
 # Points are (lon, lat) pairs forming continent outlines
 WORLD_OUTLINE = [
     # North America
-    [(-168, 65), (-140, 70), (-120, 68), (-100, 70), (-80, 72), (-60, 65),
-     (-80, 45), (-70, 42), (-75, 35), (-80, 32), (-82, 28), (-88, 28),
-     (-97, 26), (-104, 30), (-117, 32), (-122, 37), (-125, 42), (-124, 48),
-     (-130, 55), (-168, 65)],
+    [
+        (-168, 65),
+        (-140, 70),
+        (-120, 68),
+        (-100, 70),
+        (-80, 72),
+        (-60, 65),
+        (-80, 45),
+        (-70, 42),
+        (-75, 35),
+        (-80, 32),
+        (-82, 28),
+        (-88, 28),
+        (-97, 26),
+        (-104, 30),
+        (-117, 32),
+        (-122, 37),
+        (-125, 42),
+        (-124, 48),
+        (-130, 55),
+        (-168, 65),
+    ],
     # South America
-    [(-82, 8), (-75, 5), (-70, 2), (-50, -2), (-35, -8), (-40, -22),
-     (-55, -25), (-58, -38), (-68, -50), (-75, -52), (-70, -45), (-72, -35),
-     (-70, -18), (-82, 8)],
+    [
+        (-82, 8),
+        (-75, 5),
+        (-70, 2),
+        (-50, -2),
+        (-35, -8),
+        (-40, -22),
+        (-55, -25),
+        (-58, -38),
+        (-68, -50),
+        (-75, -52),
+        (-70, -45),
+        (-72, -35),
+        (-70, -18),
+        (-82, 8),
+    ],
     # Europe
-    [(-10, 60), (0, 50), (10, 55), (25, 60), (30, 70), (40, 68), (35, 60),
-     (28, 45), (25, 38), (10, 38), (0, 45), (-10, 45), (-10, 60)],
+    [
+        (-10, 60),
+        (0, 50),
+        (10, 55),
+        (25, 60),
+        (30, 70),
+        (40, 68),
+        (35, 60),
+        (28, 45),
+        (25, 38),
+        (10, 38),
+        (0, 45),
+        (-10, 45),
+        (-10, 60),
+    ],
     # Africa
-    [(-18, 28), (-12, 15), (-18, 8), (-5, 5), (10, 4), (15, -15), (35, -20),
-     (28, -35), (20, -35), (12, -5), (42, 12), (52, 28), (35, 32), (10, 35),
-     (-5, 35), (-18, 28)],
+    [
+        (-18, 28),
+        (-12, 15),
+        (-18, 8),
+        (-5, 5),
+        (10, 4),
+        (15, -15),
+        (35, -20),
+        (28, -35),
+        (20, -35),
+        (12, -5),
+        (42, 12),
+        (52, 28),
+        (35, 32),
+        (10, 35),
+        (-5, 35),
+        (-18, 28),
+    ],
     # Asia
-    [(25, 38), (35, 35), (60, 42), (75, 35), (90, 22), (104, 22), (108, 12),
-     (120, 22), (130, 35), (145, 45), (155, 60), (170, 68), (180, 68),
-     (180, 70), (100, 78), (70, 75), (50, 65), (40, 55), (25, 38)],
+    [
+        (25, 38),
+        (35, 35),
+        (60, 42),
+        (75, 35),
+        (90, 22),
+        (104, 22),
+        (108, 12),
+        (120, 22),
+        (130, 35),
+        (145, 45),
+        (155, 60),
+        (170, 68),
+        (180, 68),
+        (180, 70),
+        (100, 78),
+        (70, 75),
+        (50, 65),
+        (40, 55),
+        (25, 38),
+    ],
     # Australia
-    [(113, -22), (125, -15), (145, -15), (153, -28), (150, -38), (140, -38),
-     (130, -32), (118, -35), (113, -22)],
+    [
+        (113, -22),
+        (125, -15),
+        (145, -15),
+        (153, -28),
+        (150, -38),
+        (140, -38),
+        (130, -32),
+        (118, -35),
+        (113, -22),
+    ],
 ]
 
 
@@ -72,11 +159,12 @@ def _great_circle_points(
     lon2_rad = math.radians(lon2)
 
     # Angular distance
-    d = 2 * math.asin(math.sqrt(
-        (math.sin((lat2_rad - lat1_rad) / 2)) ** 2 +
-        math.cos(lat1_rad) * math.cos(lat2_rad) *
-        (math.sin((lon2_rad - lon1_rad) / 2)) ** 2
-    ))
+    d = 2 * math.asin(
+        math.sqrt(
+            (math.sin((lat2_rad - lat1_rad) / 2)) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * (math.sin((lon2_rad - lon1_rad) / 2)) ** 2
+        )
+    )
 
     if d < 0.001:
         return [(lat1, lon1), (lat2, lon2)]
@@ -87,8 +175,12 @@ def _great_circle_points(
         a = math.sin((1 - f) * d) / math.sin(d)
         b = math.sin(f * d) / math.sin(d)
 
-        x = a * math.cos(lat1_rad) * math.cos(lon1_rad) + b * math.cos(lat2_rad) * math.cos(lon2_rad)
-        y = a * math.cos(lat1_rad) * math.sin(lon1_rad) + b * math.cos(lat2_rad) * math.sin(lon2_rad)
+        x = a * math.cos(lat1_rad) * math.cos(lon1_rad) + b * math.cos(lat2_rad) * math.cos(
+            lon2_rad
+        )
+        y = a * math.cos(lat1_rad) * math.sin(lon1_rad) + b * math.cos(lat2_rad) * math.sin(
+            lon2_rad
+        )
         z = a * math.sin(lat1_rad) + b * math.sin(lat2_rad)
 
         lat = math.degrees(math.atan2(z, math.sqrt(x * x + y * y)))
@@ -147,13 +239,13 @@ def generate_svg(
       .legend-text {{ font-family: -apple-system, BlinkMacSystemFont, sans-serif; font-size: 10px; fill: #666; }}
     </style>
   </defs>
-  
+
   <!-- Background -->
   <rect width="{width}" height="{height}" fill="#FAFAFA"/>
 ''')
 
     # Draw world outline
-    svg_parts.append('  <!-- World outline -->')
+    svg_parts.append("  <!-- World outline -->")
     for continent in WORLD_OUTLINE:
         points = []
         for lon, lat in continent:
@@ -165,7 +257,7 @@ def generate_svg(
 
     # Draw path lines
     geo_hops = [h for h in trace.hops if h.geo]
-    svg_parts.append('  <!-- Path lines -->')
+    svg_parts.append("  <!-- Path lines -->")
 
     for i in range(1, len(geo_hops)):
         prev = geo_hops[i - 1]
@@ -178,9 +270,7 @@ def generate_svg(
 
             # Generate great circle arc
             arc_points = _great_circle_points(
-                prev.geo.lat, prev.geo.lon,
-                curr.geo.lat, curr.geo.lon,
-                num_points=15
+                prev.geo.lat, prev.geo.lon, curr.geo.lat, curr.geo.lon, num_points=15
             )
 
             svg_points = []
@@ -194,7 +284,7 @@ def generate_svg(
             )
 
     # Draw hop markers
-    svg_parts.append('  <!-- Hop markers -->')
+    svg_parts.append("  <!-- Hop markers -->")
 
     for hop in trace.hops:
         if not hop.geo:
@@ -242,9 +332,9 @@ def generate_svg(
 ''')
 
     # Close SVG
-    svg_parts.append('</svg>')
+    svg_parts.append("</svg>")
 
-    return '\n'.join(svg_parts)
+    return "\n".join(svg_parts)
 
 
 def export_svg(trace: TraceRun, output_path: Path, **kwargs) -> None:

@@ -3,11 +3,10 @@ Test data models.
 
 Author: gadwant
 """
-import math
 
 import pytest
 
-from tracemap.models import Hop, HopGeo, HopProbe, TraceRun, TraceMeta, _haversine_km
+from tracemap.models import Hop, HopGeo, TraceMeta, TraceRun, _haversine_km
 
 
 class TestHopGeo:
@@ -68,7 +67,7 @@ class TestTraceRunDetourAlerts:
 
     def test_no_alerts_short_hops(self):
         """Test no alerts for short-distance hops."""
-        from tracemap.models import Hop, HopGeo, TraceRun, TraceMeta
+        from tracemap.models import HopGeo
 
         trace = TraceRun(
             meta=TraceMeta(host="example.com", max_hops=5, probes=3, timeout_s=2.0),
@@ -91,7 +90,7 @@ class TestTraceRunDetourAlerts:
 
     def test_detour_alert_continent_jump(self):
         """Test alert for continent-crossing hop."""
-        from tracemap.models import Hop, HopGeo, TraceRun, TraceMeta
+        from tracemap.models import HopGeo
 
         trace = TraceRun(
             meta=TraceMeta(host="example.com", max_hops=5, probes=3, timeout_s=2.0),
@@ -119,7 +118,6 @@ class TestTraceRunProperties:
 
     def test_total_hops(self):
         """Test total hops count."""
-        from tracemap.models import Hop, TraceRun, TraceMeta
 
         trace = TraceRun(
             meta=TraceMeta(host="example.com", max_hops=5, probes=3, timeout_s=2.0),
@@ -130,7 +128,6 @@ class TestTraceRunProperties:
 
     def test_timeout_hops(self):
         """Test counting timeout hops."""
-        from tracemap.models import Hop, TraceRun, TraceMeta
 
         trace = TraceRun(
             meta=TraceMeta(host="example.com", max_hops=5, probes=3, timeout_s=2.0),

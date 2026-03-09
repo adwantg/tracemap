@@ -3,11 +3,9 @@ Test GeoIP functionality.
 
 Author: gadwant
 """
-import pytest
 
 from tracemap.geo import MockGeoLocator
 from tracemap.models import is_private_ip
-
 
 
 class TestMockGeoLocator:
@@ -39,7 +37,7 @@ class TestMockGeoLocator:
     def test_locate_unknown_ip(self):
         """Test locating unknown IP gets deterministic hash-based location."""
         locator = MockGeoLocator()
-        
+
         geo1 = locator.locate("192.168.1.1")
         geo2 = locator.locate("192.168.1.1")
 

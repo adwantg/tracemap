@@ -9,6 +9,7 @@ Based on: https://paris-traceroute.net/
 
 Author: gadwant
 """
-from .paris import ParisProber, ECMPDetector
+
+from .paris import ECMPDetector, ParisProber
 
 __all__ = ["ParisProber", "ECMPDetector"]

@@ -9,6 +9,7 @@ Provides SQLite-based caching to:
 
 Author: gadwant
 """
-from .sqlite import GeoCache, ASNCache, DNSCache
+
+from .sqlite import ASNCache, DNSCache, GeoCache
 
 __all__ = ["GeoCache", "ASNCache", "DNSCache"]

@@ -9,7 +9,8 @@ Continuously traces a host and tracks:
 
 Author: gadwant
 """
-from .monitor import TraceMonitor
+
 from .alerts import AnomalyDetector
+from .monitor import TraceMonitor
 
 __all__ = ["TraceMonitor", "AnomalyDetector"]

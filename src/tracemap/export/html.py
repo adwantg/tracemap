@@ -10,11 +10,12 @@ Generates a self-contained HTML file with:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 from ..models import TraceRun
 
@@ -70,14 +71,16 @@ def _hop_to_geojson(trace: TraceRun) -> Dict[str, Any]:
             "is_timeout": hop.is_timeout,
         }
 
-        features.append({
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [hop.geo.lon, hop.geo.lat],
-            },
-            "properties": properties,
-        })
+        features.append(
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [hop.geo.lon, hop.geo.lat],
+                },
+                "properties": properties,
+            }
+        )
 
     # Add path lines
     geo_hops = [h for h in trace.hops if h.geo]
@@ -86,22 +89,24 @@ def _hop_to_geojson(trace: TraceRun) -> Dict[str, Any]:
         curr = geo_hops[i]
 
         if prev.geo and curr.geo:
-            features.append({
-                "type": "Feature",
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                        [prev.geo.lon, prev.geo.lat],
-                        [curr.geo.lon, curr.geo.lat],
-                    ],
-                },
-                "properties": {
-                    "from_hop": prev.hop,
-                    "to_hop": curr.hop,
-                    "color": _get_path_color(prev, curr),
-                    "is_timeout": curr.is_timeout,
-                },
-            })
+            features.append(
+                {
+                    "type": "Feature",
+                    "geometry": {
+                        "type": "LineString",
+                        "coordinates": [
+                            [prev.geo.lon, prev.geo.lat],
+                            [curr.geo.lon, curr.geo.lat],
+                        ],
+                    },
+                    "properties": {
+                        "from_hop": prev.hop,
+                        "to_hop": curr.hop,
+                        "color": _get_path_color(prev, curr),
+                        "is_timeout": curr.is_timeout,
+                    },
+                }
+            )
 
     return {
         "type": "FeatureCollection",
@@ -109,7 +114,7 @@ def _hop_to_geojson(trace: TraceRun) -> Dict[str, Any]:
     }
 
 
-HTML_TEMPLATE = '''<!DOCTYPE html>
+HTML_TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -322,7 +327,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
     </script>
 </body>
 </html>
-'''
+"""
 
 
 def export_html(trace: TraceRun, output_path: Path) -> None:

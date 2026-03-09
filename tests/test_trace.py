@@ -3,10 +3,9 @@ Test traceroute parsing functionality.
 
 Author: gadwant
 """
-import pytest
 
-from tracemap.trace import _parse_hop_line, Protocol
 from tracemap.models import Hop
+from tracemap.trace import _parse_hop_line
 
 
 class TestHopLineParsing:

@@ -3,16 +3,15 @@ Test rendering functionality.
 
 Author: gadwant
 """
-import pytest
 
-from tracemap.models import Hop, HopGeo, HopProbe, TraceRun, TraceMeta
+from tracemap.models import Hop, HopGeo, HopProbe, TraceMeta, TraceRun
 from tracemap.render import (
     MapConfig,
-    _project,
-    _bresenham,
-    render_static,
-    get_rtt_level,
     RTTLevel,
+    _bresenham,
+    _project,
+    get_rtt_level,
+    render_static,
 )
 
 

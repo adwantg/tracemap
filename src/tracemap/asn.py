@@ -8,10 +8,10 @@ Provides pluggable backends for IP to ASN lookup:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import socket
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path

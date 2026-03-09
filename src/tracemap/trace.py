@@ -8,6 +8,7 @@ Supports:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import platform
@@ -129,7 +130,7 @@ def _build_cmd(cfg: TraceConfig, binary: str) -> List[str]:
     # Source Interface
     if cfg.source_interface:
         cmd.extend(["-i", cfg.source_interface])
-        
+
     # Source Port
     # Note: For UDP/TCP, -p is often destination port, -s is source address/port depending on version.
     # macOS traceroute: -s src_addr. No direct source port flag except varying start port?
@@ -141,10 +142,10 @@ def _build_cmd(cfg: TraceConfig, binary: str) -> List[str]:
     # For now, let's try to add if provided.
     if cfg.source_port:
         if is_macos:
-             # macOS traceroute doesn't have an easy fixed source port flag for UDP
-             pass 
+            # macOS traceroute doesn't have an easy fixed source port flag for UDP
+            pass
         else:
-             cmd.extend(["--sport", str(cfg.source_port)])
+            cmd.extend(["--sport", str(cfg.source_port)])
 
     # Target host
     cmd.append(cfg.host)
@@ -326,9 +327,7 @@ def run_traceroute(
         console.print(f"[dim]Resolved to {resolved_ip}[/dim]")
     console.print()
 
-    proc = subprocess.Popen(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True
-    )
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
     assert proc.stdout is not None
 
@@ -352,6 +351,7 @@ def run_traceroute(
         else:
             # Default: Clean table mode
             from .render import _hop_table
+
             with Live(_hop_table(trace), refresh_per_second=2, console=console) as live:
                 for hop in _parse_traceroute_output(line_generator(), cfg.probes):
                     # Resolve geo for responding hops

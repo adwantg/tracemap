@@ -9,19 +9,19 @@ Provides:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
+from rich import box
 from rich.console import Console
 from rich.panel import Panel
-from rich.style import Style
 from rich.table import Table
 from rich.text import Text
-from rich import box
 
 from .models import Hop, TraceRun
 
@@ -32,41 +32,161 @@ from .models import Hop, TraceRun
 # Coarse continent outline points (lon, lat) for basic ASCII map
 CONTINENT_DOTS = [
     # North America
-    (-130, 55), (-125, 60), (-120, 65), (-100, 70), (-80, 70), (-60, 65),
-    (-120, 60), (-110, 55), (-100, 50), (-90, 45), (-80, 40), (-75, 35),
-    (-80, 30), (-90, 30), (-100, 30), (-105, 25), (-110, 30), (-115, 32),
-    (-120, 35), (-125, 40), (-125, 48),
+    (-130, 55),
+    (-125, 60),
+    (-120, 65),
+    (-100, 70),
+    (-80, 70),
+    (-60, 65),
+    (-120, 60),
+    (-110, 55),
+    (-100, 50),
+    (-90, 45),
+    (-80, 40),
+    (-75, 35),
+    (-80, 30),
+    (-90, 30),
+    (-100, 30),
+    (-105, 25),
+    (-110, 30),
+    (-115, 32),
+    (-120, 35),
+    (-125, 40),
+    (-125, 48),
     # Central America & Caribbean
-    (-90, 20), (-85, 15), (-80, 10), (-75, 10),
+    (-90, 20),
+    (-85, 15),
+    (-80, 10),
+    (-75, 10),
     # South America
-    (-80, 10), (-75, 5), (-80, 0), (-75, -5), (-70, -10), (-65, -15),
-    (-60, -20), (-55, -25), (-50, -25), (-45, -20), (-40, -15), (-35, -10),
-    (-35, -5), (-50, 0), (-55, 5), (-60, 5), (-65, 0), (-70, -5),
-    (-75, -35), (-72, -45), (-75, -52),
+    (-80, 10),
+    (-75, 5),
+    (-80, 0),
+    (-75, -5),
+    (-70, -10),
+    (-65, -15),
+    (-60, -20),
+    (-55, -25),
+    (-50, -25),
+    (-45, -20),
+    (-40, -15),
+    (-35, -10),
+    (-35, -5),
+    (-50, 0),
+    (-55, 5),
+    (-60, 5),
+    (-65, 0),
+    (-70, -5),
+    (-75, -35),
+    (-72, -45),
+    (-75, -52),
     # Europe
-    (-10, 60), (-5, 58), (0, 55), (5, 52), (10, 55), (15, 55), (20, 55),
-    (25, 55), (30, 55), (25, 60), (20, 65), (10, 70), (25, 70), (30, 68),
-    (-5, 50), (0, 48), (5, 45), (10, 45), (15, 42), (10, 40), (5, 38),
-    (0, 40), (-5, 43), (-10, 43),
+    (-10, 60),
+    (-5, 58),
+    (0, 55),
+    (5, 52),
+    (10, 55),
+    (15, 55),
+    (20, 55),
+    (25, 55),
+    (30, 55),
+    (25, 60),
+    (20, 65),
+    (10, 70),
+    (25, 70),
+    (30, 68),
+    (-5, 50),
+    (0, 48),
+    (5, 45),
+    (10, 45),
+    (15, 42),
+    (10, 40),
+    (5, 38),
+    (0, 40),
+    (-5, 43),
+    (-10, 43),
     # Africa
-    (-15, 30), (-5, 35), (10, 35), (20, 32), (30, 30), (35, 25), (40, 15),
-    (50, 10), (45, 0), (40, -5), (35, -15), (30, -25), (25, -33), (20, -35),
-    (15, -30), (10, -5), (5, 5), (0, 5), (-5, 5), (-10, 5), (-15, 10),
+    (-15, 30),
+    (-5, 35),
+    (10, 35),
+    (20, 32),
+    (30, 30),
+    (35, 25),
+    (40, 15),
+    (50, 10),
+    (45, 0),
+    (40, -5),
+    (35, -15),
+    (30, -25),
+    (25, -33),
+    (20, -35),
+    (15, -30),
+    (10, -5),
+    (5, 5),
+    (0, 5),
+    (-5, 5),
+    (-10, 5),
+    (-15, 10),
     (-15, 20),
     # Asia
-    (35, 35), (40, 40), (45, 45), (50, 50), (60, 55), (70, 55), (80, 55),
-    (90, 50), (100, 50), (110, 45), (120, 45), (130, 45), (140, 45), (145, 50),
-    (150, 55), (160, 60), (170, 65), (180, 65),
-    (70, 30), (75, 25), (80, 20), (85, 25), (90, 25), (95, 20), (100, 15),
-    (105, 10), (110, 5), (115, 5), (120, 10), (125, 15), (130, 25), (135, 35),
+    (35, 35),
+    (40, 40),
+    (45, 45),
+    (50, 50),
+    (60, 55),
+    (70, 55),
+    (80, 55),
+    (90, 50),
+    (100, 50),
+    (110, 45),
+    (120, 45),
+    (130, 45),
+    (140, 45),
+    (145, 50),
+    (150, 55),
+    (160, 60),
+    (170, 65),
+    (180, 65),
+    (70, 30),
+    (75, 25),
+    (80, 20),
+    (85, 25),
+    (90, 25),
+    (95, 20),
+    (100, 15),
+    (105, 10),
+    (110, 5),
+    (115, 5),
+    (120, 10),
+    (125, 15),
+    (130, 25),
+    (135, 35),
     # Southeast Asia / Indonesia
-    (100, 5), (105, 0), (110, -5), (115, -8), (120, -8), (130, -5), (140, -5),
+    (100, 5),
+    (105, 0),
+    (110, -5),
+    (115, -8),
+    (120, -8),
+    (130, -5),
+    (140, -5),
     # Australia
-    (115, -20), (120, -18), (130, -15), (140, -15), (150, -20), (153, -25),
-    (150, -35), (145, -38), (140, -35), (135, -32), (130, -30), (125, -25),
+    (115, -20),
+    (120, -18),
+    (130, -15),
+    (140, -15),
+    (150, -20),
+    (153, -25),
+    (150, -35),
+    (145, -38),
+    (140, -35),
+    (135, -32),
+    (130, -30),
+    (125, -25),
     (120, -20),
     # New Zealand
-    (170, -35), (175, -40), (178, -45),
+    (170, -35),
+    (175, -40),
+    (178, -45),
 ]
 
 
@@ -74,11 +194,13 @@ CONTINENT_DOTS = [
 # Color Configuration
 # ============================================================================
 
+
 class RTTLevel(Enum):
     """RTT level for color coding."""
-    LOW = "low"      # < 50ms - green
-    MED = "med"      # 50-150ms - yellow
-    HIGH = "high"    # > 150ms - red
+
+    LOW = "low"  # < 50ms - green
+    MED = "med"  # 50-150ms - yellow
+    HIGH = "high"  # > 150ms - red
     TIMEOUT = "timeout"
 
 
@@ -102,8 +224,8 @@ RTT_COLORS = {
 
 LOSS_COLORS = {
     0: "green",
-    1: "yellow",   # 1-33%
-    2: "red",      # > 33%
+    1: "yellow",  # 1-33%
+    2: "red",  # > 33%
 }
 
 
@@ -120,9 +242,11 @@ def get_loss_color(loss_pct: float) -> str:
 # Map Configuration
 # ============================================================================
 
+
 @dataclass
 class MapConfig:
     """Configuration for map rendering."""
+
     width: int = 120
     height: int = 32
     lat_min: float = -70
@@ -140,6 +264,7 @@ class MapConfig:
 @dataclass
 class BrailleMapConfig(MapConfig):
     """Configuration for braille-based map rendering."""
+
     use_braille: bool = True
     # Braille gives 2x4 subpixel resolution per character
     # Effective resolution: width*2 x height*4
@@ -156,6 +281,7 @@ class BrailleMapConfig(MapConfig):
 # ============================================================================
 # Projection and Geometry
 # ============================================================================
+
 
 def _project(lat: float, lon: float, cfg: MapConfig) -> Tuple[int, int]:
     """Equirectangular projection into grid coordinates (x, y)."""
@@ -216,11 +342,12 @@ def _great_circle_points(
     lon2_rad = math.radians(lon2)
 
     # Angular distance
-    d = 2 * math.asin(math.sqrt(
-        (math.sin((lat2_rad - lat1_rad) / 2)) ** 2 +
-        math.cos(lat1_rad) * math.cos(lat2_rad) *
-        (math.sin((lon2_rad - lon1_rad) / 2)) ** 2
-    ))
+    d = 2 * math.asin(
+        math.sqrt(
+            (math.sin((lat2_rad - lat1_rad) / 2)) ** 2
+            + math.cos(lat1_rad) * math.cos(lat2_rad) * (math.sin((lon2_rad - lon1_rad) / 2)) ** 2
+        )
+    )
 
     if d < 0.001:  # Very short distance, just straight line
         return [(lat1, lon1), (lat2, lon2)]
@@ -231,8 +358,12 @@ def _great_circle_points(
         a = math.sin((1 - f) * d) / math.sin(d)
         b = math.sin(f * d) / math.sin(d)
 
-        x = a * math.cos(lat1_rad) * math.cos(lon1_rad) + b * math.cos(lat2_rad) * math.cos(lon2_rad)
-        y = a * math.cos(lat1_rad) * math.sin(lon1_rad) + b * math.cos(lat2_rad) * math.sin(lon2_rad)
+        x = a * math.cos(lat1_rad) * math.cos(lon1_rad) + b * math.cos(lat2_rad) * math.cos(
+            lon2_rad
+        )
+        y = a * math.cos(lat1_rad) * math.sin(lon1_rad) + b * math.cos(lat2_rad) * math.sin(
+            lon2_rad
+        )
         z = a * math.sin(lat1_rad) + b * math.sin(lat2_rad)
 
         lat = math.degrees(math.atan2(z, math.sqrt(x * x + y * y)))
@@ -345,6 +476,7 @@ class BrailleCanvas:
 # ASCII Map Rendering
 # ============================================================================
 
+
 def _empty_grid(cfg: MapConfig) -> List[List[str]]:
     """Create an empty character grid."""
     return [[" " for _ in range(cfg.width)] for _ in range(cfg.height)]
@@ -358,7 +490,9 @@ def _draw_background(grid: List[List[str]], cfg: MapConfig) -> None:
             grid[y][x] = cfg.land_char
 
 
-def _draw_path(grid: List[List[str]], hops: List[Hop], cfg: MapConfig, use_great_circle: bool = True) -> None:
+def _draw_path(
+    grid: List[List[str]], hops: List[Hop], cfg: MapConfig, use_great_circle: bool = True
+) -> None:
     """Draw path lines between hops."""
     pts: List[Tuple[int, int]] = []
     geo_hops = [h for h in hops if h.geo]
@@ -375,13 +509,15 @@ def _draw_path(grid: List[List[str]], hops: List[Hop], cfg: MapConfig, use_great
 
             if prev_hop.geo and curr_hop.geo:
                 arc_points = _great_circle_points(
-                    prev_hop.geo.lat, prev_hop.geo.lon,
-                    curr_hop.geo.lat, curr_hop.geo.lon,
-                    num_points=15
+                    prev_hop.geo.lat,
+                    prev_hop.geo.lon,
+                    curr_hop.geo.lat,
+                    curr_hop.geo.lon,
+                    num_points=15,
                 )
 
                 for j in range(1, len(arc_points)):
-                    ax, ay = _project(arc_points[j-1][0], arc_points[j-1][1], cfg)
+                    ax, ay = _project(arc_points[j - 1][0], arc_points[j - 1][1], cfg)
                     bx, by = _project(arc_points[j][0], arc_points[j][1], cfg)
 
                     for x, y in _bresenham((ax, ay), (bx, by)):
@@ -398,25 +534,25 @@ def _draw_path(grid: List[List[str]], hops: List[Hop], cfg: MapConfig, use_great
 def _draw_markers(grid: List[List[str]], hops: List[Hop], cfg: MapConfig) -> None:
     """
     Draw hop markers on the grid.
-    
+
     Handles overlapping markers by showing the first hop number
     and marking clusters with a special indicator.
     """
     # Track which grid positions have hops
     hop_positions: Dict[Tuple[int, int], List[int]] = {}
-    
+
     # Collect all hop positions
     for h in hops:
         if not h.geo:
             continue
-        
+
         x, y = _project(h.geo.lat, h.geo.lon, cfg)
         pos = (x, y)
-        
+
         if pos not in hop_positions:
             hop_positions[pos] = []
         hop_positions[pos].append(h.hop)
-    
+
     # Draw markers
     for (x, y), hop_nums in hop_positions.items():
         if cfg.marker_style == "number":
@@ -426,20 +562,20 @@ def _draw_markers(grid: List[List[str]], hops: List[Hop], cfg: MapConfig) -> Non
             else:
                 # Multiple hops - show first with cluster indicator
                 # e.g., "3+" means hops 3,4,5... at same location
-                mark = f"{hop_nums[0]%10}+"
+                mark = f"{hop_nums[0] % 10}+"
                 # If it won't fit, just show the marker
                 if x + 1 < cfg.width and grid[y][x + 1] == cfg.background_char:
                     grid[y][x + 1] = "+"
                 mark = str(hop_nums[0] % 10)
         elif cfg.marker_style == "letter":
-            mark = chr(ord('A') + (hop_nums[0] - 1) % 26)
+            mark = chr(ord("A") + (hop_nums[0] - 1) % 26)
             if len(hop_nums) > 1:
                 # Add + for clusters
                 if x + 1 < cfg.width and grid[y][x + 1] == cfg.background_char:
                     grid[y][x + 1] = "+"
         else:
             mark = "●"
-        
+
         grid[y][x] = mark
 
 
@@ -472,7 +608,9 @@ def render_static(trace: TraceRun, cfg: Optional[MapConfig] = None) -> str:
     output = [header]
 
     if cfg.show_legend:
-        legend = f"legend: {cfg.land_char} land  {cfg.path_char} path  0-9 hop markers  + clustered hops"
+        legend = (
+            f"legend: {cfg.land_char} land  {cfg.path_char} path  0-9 hop markers  + clustered hops"
+        )
         output.append(legend)
 
     output.append("")
@@ -517,13 +655,15 @@ def render_braille(trace: TraceRun, cfg: Optional[BrailleMapConfig] = None) -> s
 
         if prev_hop.geo and curr_hop.geo:
             arc_points = _great_circle_points(
-                prev_hop.geo.lat, prev_hop.geo.lon,
-                curr_hop.geo.lat, curr_hop.geo.lon,
-                num_points=30
+                prev_hop.geo.lat,
+                prev_hop.geo.lon,
+                curr_hop.geo.lat,
+                curr_hop.geo.lon,
+                num_points=30,
             )
 
             for j in range(1, len(arc_points)):
-                ax, ay = _project_braille(arc_points[j-1][0], arc_points[j-1][1], cfg)
+                ax, ay = _project_braille(arc_points[j - 1][0], arc_points[j - 1][1], cfg)
                 bx, by = _project_braille(arc_points[j][0], arc_points[j][1], cfg)
                 canvas.draw_line(ax, ay, bx, by)
 
@@ -551,18 +691,19 @@ def render_braille(trace: TraceRun, cfg: Optional[BrailleMapConfig] = None) -> s
 # Rich Table Output
 # ============================================================================
 
+
 def _hop_table(trace: TraceRun, show_asn: bool = True, max_consecutive_timeouts: int = 3) -> Table:
     """
     Render hop information as a Rich table.
-    
+
     Stops displaying hops after max_consecutive_timeouts to avoid cluttering
     output with endless rows of asterisks (MTR-style behavior).
-    
+
     Args:
         trace: The trace result
         show_asn: Whether to include ASN column
         max_consecutive_timeouts: Stop after this many consecutive timeout hops
-    
+
     Returns:
         Rich Table with hop information
     """
@@ -582,7 +723,6 @@ def _hop_table(trace: TraceRun, show_asn: bool = True, max_consecutive_timeouts:
 
     consecutive_timeouts = 0
     cutoff_hop = None
-    last_real_hop = None
 
     for hop in trace.hops:
         # Track consecutive timeouts
@@ -590,7 +730,6 @@ def _hop_table(trace: TraceRun, show_asn: bool = True, max_consecutive_timeouts:
             consecutive_timeouts += 1
         else:
             consecutive_timeouts = 0
-            last_real_hop = hop.hop
 
         # Build row
         hop_num = str(hop.hop)
@@ -662,7 +801,7 @@ def _hop_table(trace: TraceRun, show_asn: bool = True, max_consecutive_timeouts:
             # Add empty row for spacing
             col_count = 8 if show_asn else 7
             t.add_row(*[""] * col_count)
-            
+
             # Add summary message
             summary_text = f"[dim italic]({remaining} more timeout hops not shown - destination likely reached or firewalled)[/dim italic]"
             t.add_row(summary_text, *[""] * (col_count - 1))
@@ -681,7 +820,7 @@ def render_frame(trace: TraceRun) -> Panel:
         Rich Panel containing map and status
     """
     map_txt = Text(render_static(trace))
-    table = _hop_table(trace, show_asn=True)
+    _hop_table(trace, show_asn=True)
 
     # Summary
     summary_parts = [
@@ -731,10 +870,12 @@ def render_full(trace: TraceRun, console: Optional[Console] = None) -> None:
 
     # Stats
     console.print()
-    console.print(f"[dim]Total hops: {trace.total_hops} | "
-                  f"Responded: {trace.responded_hops} | "
-                  f"Timeouts: {trace.timeout_hops} | "
-                  f"Avg Loss: {trace.avg_loss_pct:.1f}%[/dim]")
+    console.print(
+        f"[dim]Total hops: {trace.total_hops} | "
+        f"Responded: {trace.responded_hops} | "
+        f"Timeouts: {trace.timeout_hops} | "
+        f"Avg Loss: {trace.avg_loss_pct:.1f}%[/dim]"
+    )
 
 
 def render_live(*args, **kwargs):

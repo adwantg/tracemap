@@ -11,20 +11,26 @@ Commands:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import json
 import os
-from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
 import typer
 from rich.console import Console
 
-from .geo import CachingGeoLocator, EnhancedGeoLocator, GeoLocator, MaxMindGeoLocator, MockGeoLocator
+from .geo import (
+    CachingGeoLocator,
+    EnhancedGeoLocator,
+    GeoLocator,
+    MaxMindGeoLocator,
+    MockGeoLocator,
+)
 from .models import TraceRun
-from .render import render_full, render_static
+from .render import render_full
 from .trace import Protocol, TraceConfig, run_traceroute, traceroute_binary
 
 app = typer.Typer(
@@ -56,6 +62,7 @@ def _pick_geolocator(
     if use_api:
         try:
             from .geo_api import get_best_locator
+
             console.print("[green]Using real-time API geo lookup (ip-api.com)[/green]")
             console.print("[dim]No setup required! Getting real locations...[/dim]")
             return get_best_locator(
@@ -81,7 +88,9 @@ def _pick_geolocator(
     else:
         base_locator = MockGeoLocator()
         console.print("[yellow]Using mock geo data (less accurate)[/yellow]")
-        console.print("[dim]Tip: Use --api flag for real locations, or set TRACEMAP_GEOIP_MMDB for offline mode[/dim]")
+        console.print(
+            "[dim]Tip: Use --api flag for real locations, or set TRACEMAP_GEOIP_MMDB for offline mode[/dim]"
+        )
 
     # Add caching
     cached_locator = CachingGeoLocator(base_locator)
@@ -90,6 +99,7 @@ def _pick_geolocator(
     if enable_asn:
         try:
             from .asn import get_default_resolver
+
             asn_resolver = get_default_resolver()
             return EnhancedGeoLocator(cached_locator, asn_resolver)
         except Exception as e:
@@ -119,11 +129,15 @@ def doctor() -> None:
     if mmdb_path and mmdb_path.exists():
         console.print(f"[green]✓ GeoIP database (TRACEMAP_GEOIP_MMDB):[/green] {mmdb_path}")
     elif mmdb_path and not mmdb_path.exists():
-        console.print(f"[yellow]✗ GeoIP database (TRACEMAP_GEOIP_MMDB) not found:[/yellow] {mmdb_path}")
+        console.print(
+            f"[yellow]✗ GeoIP database (TRACEMAP_GEOIP_MMDB) not found:[/yellow] {mmdb_path}"
+        )
     else:
         console.print("[yellow]  GeoIP MMDB not configured (optional)[/yellow]")
         console.print("[dim]  Strategy: API lookups (ip-api → ipapi.co) → mock fallback[/dim]")
-        console.print("[dim]  For offline: export TRACEMAP_GEOIP_MMDB=/path/to/GeoLite2-City.mmdb[/dim]")
+        console.print(
+            "[dim]  For offline: export TRACEMAP_GEOIP_MMDB=/path/to/GeoLite2-City.mmdb[/dim]"
+        )
 
     # Check ASN database
     asn_db = Path.home() / ".tracemap" / "asn.dat"
@@ -131,17 +145,20 @@ def doctor() -> None:
         console.print(f"[green]✓ ASN database found:[/green] {asn_db}")
     else:
         console.print("[dim]  ASN database not found (optional, will use DNS lookup)[/dim]")
-    
+
     # Check cache database
     cache_db = Path.home() / ".tracemap" / "cache.sqlite"
     if cache_db.exists():
         try:
             from .cache import GeoCache
+
             cache = GeoCache(cache_db)
             stats = cache.get_stats()
             console.print(f"[green]✓ Cache database:[/green] {cache_db}")
-            console.print(f"  Valid entries: {stats['valid_entries']}, Expired: {stats['expired_entries']}")
-            if stats['hits'] > 0:
+            console.print(
+                f"  Valid entries: {stats['valid_entries']}, Expired: {stats['expired_entries']}"
+            )
+            if stats["hits"] > 0:
                 console.print(f"  Hit rate: {stats['hit_rate']:.1%}")
         except Exception as e:
             console.print(f"[yellow]⚠ Cache database exists but error:[/yellow] {e}")
@@ -158,24 +175,42 @@ def trace(
     timeout_s: float = typer.Option(2.0, "--timeout", "-w", help="Per-probe timeout (seconds)"),
     probes: int = typer.Option(3, "--probes", "-q", help="Probes per hop"),
     protocol: str = typer.Option("udp", "--protocol", "-P", help="Protocol: udp, tcp, icmp"),
-    geoip_mmdb: Optional[Path] = typer.Option(None, "--geoip-mmdb", help="Path to GeoLite2-City.mmdb"),
+    geoip_mmdb: Optional[Path] = typer.Option(
+        None, "--geoip-mmdb", help="Path to GeoLite2-City.mmdb"
+    ),
     out: Path = typer.Option(Path(".tracemap/trace.json"), "--out", "-o", help="Output JSON path"),
     enable_asn: bool = typer.Option(False, "--asn", help="Enable ASN lookup"),
     no_live: bool = typer.Option(False, "--no-live", help="Disable live table updates"),
     redact: bool = typer.Option(False, "--redact", help="Redact IP addresses in output"),
-    use_api: bool = typer.Option(True, "--api/--no-api", help="Use real-time API for geo lookups (default: enabled)"),
-    show_map: bool = typer.Option(False, "--ascii-map", help="Show ASCII world map (use HTML export instead)"),
-    profile: Optional[str] = typer.Option(None, "--profile", help="Use preset profile: default, offline, private, fast"),
-    paris: bool = typer.Option(False, "--paris", help="Use Paris traceroute for ECMP-aware probing"),
-    discover_paths: bool = typer.Option(False, "--discover-paths", help="Discover multiple ECMP paths (slower)"),
-    dns_debug: bool = typer.Option(False, "--dns-debug", help="Check multiple DNS resolvers for consistency"),
-    source_interface: Optional[str] = typer.Option(None, "--bind", "-b", help="Bind to specific interface (e.g., eth0)"),
-    source_port: Optional[int] = typer.Option(None, "--source-port", help="Bind to specific source port"),
+    use_api: bool = typer.Option(
+        True, "--api/--no-api", help="Use real-time API for geo lookups (default: enabled)"
+    ),
+    show_map: bool = typer.Option(
+        False, "--ascii-map", help="Show ASCII world map (use HTML export instead)"
+    ),
+    profile: Optional[str] = typer.Option(
+        None, "--profile", help="Use preset profile: default, offline, private, fast"
+    ),
+    paris: bool = typer.Option(
+        False, "--paris", help="Use Paris traceroute for ECMP-aware probing"
+    ),
+    discover_paths: bool = typer.Option(
+        False, "--discover-paths", help="Discover multiple ECMP paths (slower)"
+    ),
+    dns_debug: bool = typer.Option(
+        False, "--dns-debug", help="Check multiple DNS resolvers for consistency"
+    ),
+    source_interface: Optional[str] = typer.Option(
+        None, "--bind", "-b", help="Bind to specific interface (e.g., eth0)"
+    ),
+    source_port: Optional[int] = typer.Option(
+        None, "--source-port", help="Bind to specific source port"
+    ),
 ) -> None:
     """
     Run traceroute and display hop information in a clean table.
-    
-    By default, shows a clear table of hops (like MTR). 
+
+    By default, shows a clear table of hops (like MTR).
     Use --ascii-map to show deprecated ASCII map.
     For best visualization, use the auto-generated HTML export.
     """
@@ -184,29 +219,31 @@ def trace(
     # DNS Debug Mode
     if dns_debug:
         from .analysis.dns_debug import check_dns_consistency
+
         console.print(f"[bold]DNS Consistency Check:[/bold] {host}")
         check_dns_consistency(host, console)
-        # Continue with trace... or maybe we should return? 
+        # Continue with trace... or maybe we should return?
         # Roadmap implies it's a flag for trace command so we continue.
         console.print()
-    
+
     # Apply profile settings if specified
     if profile:
         from .profiles import get_profile
+
         prof = get_profile(profile)
-        
+
         # Validate profile requirements
         is_valid, error = prof.validate(str(geoip_mmdb) if geoip_mmdb else None)
         if not is_valid:
             console.print(f"[red]Profile validation failed:[/red] {error}")
             raise typer.Exit(code=1)
-        
+
         # Override flags with profile settings
         use_api = prof.use_api
         redact = redact or prof.redact_ips  # Keep manual redact if set
-        
+
         console.print(f"[cyan]Using profile:[/cyan] {prof.name} - {prof.description}")
-        
+
         if not prof.use_dns:
             console.print("[dim]  DNS lookups disabled by profile[/dim]")
         if prof.redact_ips:
@@ -221,18 +258,18 @@ def trace(
         raise typer.Exit(code=1)
 
     geoloc = _pick_geolocator(geoip_mmdb, enable_asn=enable_asn, use_api=use_api)
-    
+
     # Handle Paris traceroute / ECMP discovery
     if paris or discover_paths:
-        from .probing import ParisProber, ECMPDetector
-        
+        from .probing import ParisProber
+
         if discover_paths:
             console.print("[cyan]Discovering ECMP paths...[/cyan]")
             console.print("[dim]This may take 30-60 seconds...[/dim]")
-            
+
             prober = ParisProber()
             ecmp_hops = prober.detect_ecmp_multipath(host, max_flows=5, max_hops=max_hops)
-            
+
             if ecmp_hops:
                 console.print(f"\n[yellow]⚠️  ECMP detected at {len(ecmp_hops)} hops:[/yellow]")
                 for hop_num, ips in sorted(ecmp_hops.items()):
@@ -242,7 +279,7 @@ def trace(
                 console.print()
             else:
                 console.print("[green]No ECMP detected (single path)[/green]\n")
-        
+
         if paris:
             console.print("[cyan]Using Paris traceroute (ECMP-aware)[/cyan]")
             # Would integrate Paris-specific tracing here
@@ -255,7 +292,7 @@ def trace(
     if profile:
         prof = get_profile(profile)
         resolve_hostnames = prof.use_dns
-    
+
     cfg = TraceConfig(
         host=host,
         max_hops=max_hops,
@@ -279,15 +316,15 @@ def trace(
         json.dumps(trace_result.model_dump(mode="json"), indent=2, default=str),
         encoding="utf-8",
     )
-    
+
     console.print()
     console.print(f"[green]✓[/green] Saved: {out}")
-
 
     # Auto-export HTML
     html_out = out.with_suffix(".html")
     try:
         from .export.html import export_html
+
         export_html(trace_result, html_out)
         console.print(f"[green]✓[/green] Saved: {html_out}")
     except Exception as e:
@@ -299,7 +336,6 @@ def trace(
     console.print(f"  → Interactive map: [cyan]open {html_out}[/cyan]")
     console.print(f"  → Terminal UI:     [cyan]tracemap tui {out}[/cyan]")
     console.print()
-
 
 
 @app.command()
@@ -317,6 +353,7 @@ def replay(
 
     if use_tui:
         from .tui.app import run_tui
+
         run_tui(trace_result)
     else:
         render_full(trace_result, console)
@@ -340,7 +377,9 @@ def tui(
 @app.command()
 def export(
     trace_json: Path = typer.Argument(..., help="Path to trace JSON"),
-    format: str = typer.Option("html", "--format", "-f", help="Export format: html, svg, md, bundle"),
+    format: str = typer.Option(
+        "html", "--format", "-f", help="Export format: html, svg, md, bundle"
+    ),
     out: Optional[Path] = typer.Option(None, "--out", "-o", help="Output file path"),
     bundle: bool = typer.Option(False, "--bundle", help="Create a ZIP bundle with all formats"),
 ) -> None:
@@ -364,6 +403,7 @@ def export(
     if format.lower() == "html":
         try:
             from .export.html import export_html
+
             export_html(trace_result, out)
             console.print(f"[green]Exported:[/green] {out}")
         except ImportError:
@@ -373,24 +413,27 @@ def export(
     elif format.lower() == "svg":
         try:
             from .export.svg import export_svg
+
             export_svg(trace_result, out)
             console.print(f"[green]Exported:[/green] {out}")
         except ImportError:
             console.print("[yellow]SVG export module not available[/yellow]")
             raise typer.Exit(code=1)
-    
+
     elif format.lower() in ("md", "markdown"):
         try:
             from .export.markdown import export_markdown
+
             export_markdown(trace_result, out)
             console.print(f"[green]Exported:[/green] {out}")
         except ImportError:
             console.print("[yellow]Markdown export module not available[/yellow]")
             raise typer.Exit(code=1)
-            
+
     elif format.lower() == "bundle":
         try:
             from .export.bundle import export_bundle
+
             export_bundle(trace_result, out)
             console.print(f"[green]Exported Bundle:[/green] {out}")
         except ImportError:
@@ -434,6 +477,7 @@ def diff(
     max_hops = max(len(run_a.hops), len(run_b.hops))
 
     from rich.table import Table
+
     t = Table(show_header=True, title="Hop Comparison")
     t.add_column("#", justify="right", width=3)
     t.add_column("Trace A IP", min_width=15)
@@ -486,7 +530,9 @@ def stats(
         console.print(f"[cyan]Resolved IP:[/cyan] {trace_result.meta.resolved_ip}")
     console.print(f"[cyan]Protocol:[/cyan] {trace_result.meta.protocol.upper()}")
     console.print(f"[cyan]Started:[/cyan] {trace_result.meta.started_at}")
-    console.print(f"[cyan]Platform:[/cyan] {trace_result.meta.platform_system} {trace_result.meta.platform_release}")
+    console.print(
+        f"[cyan]Platform:[/cyan] {trace_result.meta.platform_system} {trace_result.meta.platform_release}"
+    )
     console.print()
 
     # Hop statistics
@@ -502,7 +548,7 @@ def stats(
         console.print("[bold]RTT Statistics:[/bold]")
         console.print(f"  Min: {min(rtt_values):.1f} ms")
         console.print(f"  Max: {max(rtt_values):.1f} ms")
-        console.print(f"  Avg: {sum(rtt_values)/len(rtt_values):.1f} ms")
+        console.print(f"  Avg: {sum(rtt_values) / len(rtt_values):.1f} ms")
         console.print()
 
     # Detour alerts
@@ -513,49 +559,49 @@ def stats(
             console.print(f"  [yellow]⚠️ {alert}[/yellow]")
 
 
-
-
 @app.command()
 def cache(
     action: str = typer.Argument(..., help="Action: clear, stats"),
 ) -> None:
     """Manage persistent cache database."""
     from .cache import GeoCache
-    
+
     cache_db = Path.home() / ".tracemap" / "cache.sqlite"
-    
+
     if action == "clear":
         if not cache_db.exists():
             console.print("[yellow]Cache database doesn't exist[/yellow]")
             return
-        
+
         cache = GeoCache(cache_db)
         stats_before = cache.get_stats()
         cache.clear_all()
-        
+
         console.print(f"[green]✓ Cleared cache database:[/green] {cache_db}")
         console.print(f"  Removed {stats_before['total_entries']} entries")
-        
+
     elif action == "stats":
         if not cache_db.exists():
-            console.print("[yellow]Cache database doesn't exist yet (will be created on first trace)[/yellow]")
+            console.print(
+                "[yellow]Cache database doesn't exist yet (will be created on first trace)[/yellow]"
+            )
             return
-        
+
         cache = GeoCache(cache_db)
         stats = cache.get_stats()
-        
+
         console.print("[bold]Cache Statistics[/bold]\n")
         console.print(f"Database: {cache_db}")
         console.print(f"Total entries: {stats['total_entries']}")
         console.print(f"Valid entries: {stats['valid_entries']}")
         console.print(f"Expired entries: {stats['expired_entries']}")
-        
-        if stats['hits'] > 0 or stats['misses'] > 0:
-            console.print(f"\nSession stats:")
+
+        if stats["hits"] > 0 or stats["misses"] > 0:
+            console.print("\nSession stats:")
             console.print(f"  Hits: {stats['hits']}")
             console.print(f"  Misses: {stats['misses']}")
             console.print(f"  Hit rate: {stats['hit_rate']:.1%}")
-    
+
     else:
         console.print(f"[red]Unknown action:[/red] {action}")
         console.print("Valid actions: clear, stats")
@@ -566,31 +612,35 @@ def cache(
 def watch(
     host: str = typer.Argument(..., help="Hostname or IP to monitor"),
     interval: int = typer.Option(30, "--interval", "-i", help="Seconds between traces"),
-    duration: Optional[int] = typer.Option(None, "--duration", "-d", help="Total duration in seconds (None = infinite)"),
+    duration: Optional[int] = typer.Option(
+        None, "--duration", "-d", help="Total duration in seconds (None = infinite)"
+    ),
     max_hops: int = typer.Option(30, "--max-hops", "-m", help="Maximum hops"),
     protocol: str = typer.Option("udp", "--protocol", "-P", help="Protocol: udp, tcp, icmp"),
-    geoip_mmdb: Optional[Path] = typer.Option(None, "--geoip-mmdb", help="Path to GeoLite2-City.mmdb"),
+    geoip_mmdb: Optional[Path] = typer.Option(
+        None, "--geoip-mmdb", help="Path to GeoLite2-City.mmdb"
+    ),
     use_api: bool = typer.Option(True, "--api/--no-api", help="Use API for geo lookups"),
 ) -> None:
     """
     Continuously monitor route to host (MTR-style).
-    
+
     Detects route changes, RTT spikes, and packet loss patterns.
     Logs all traces to ~/.tracemap/watch_<host>.jsonl
     """
-    from .watch import TraceMonitor
     from .trace import Protocol, TraceConfig
-    
+    from .watch import TraceMonitor
+
     # Pick protocol
     try:
         proto = Protocol(protocol.lower())
     except ValueError:
         console.print(f"[red]Invalid protocol:[/red] {protocol}")
         raise typer.Exit(code=1)
-    
+
     # Setup geo locator
     geoloc = _pick_geolocator(geoip_mmdb, enable_asn=False, use_api=use_api)
-    
+
     # Create config
     cfg = TraceConfig(
         host=host,
@@ -599,7 +649,7 @@ def watch(
         probes=3,
         protocol=proto,
     )
-    
+
     # Run monitor
     monitor = TraceMonitor(host, cfg, geoloc, interval_seconds=interval)
     monitor.run(duration_seconds=duration)

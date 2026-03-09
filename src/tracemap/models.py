@@ -3,6 +3,7 @@ Data models for traceroute visualization.
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import platform
@@ -124,7 +125,7 @@ class TraceMeta(BaseModel):
     """Metadata about a trace run."""
 
     tool: str = "tracemap"
-    version: str = Field(default_factory=lambda: __import__('tracemap').__version__)
+    version: str = Field(default_factory=lambda: __import__("tracemap").__version__)
     host: str
     resolved_ip: Optional[str] = None
     max_hops: int
@@ -193,13 +194,9 @@ class TraceRun(BaseModel):
             curr = geo_hops[i]
 
             if prev.geo and curr.geo:
-                dist = _haversine_km(
-                    prev.geo.lat, prev.geo.lon, curr.geo.lat, curr.geo.lon
-                )
+                dist = _haversine_km(prev.geo.lat, prev.geo.lon, curr.geo.lat, curr.geo.lon)
                 if dist > distance_threshold_km:
-                    alerts.append(
-                        f"Detour detected: hop {prev.hop}→{curr.hop} spans {dist:.0f}km"
-                    )
+                    alerts.append(f"Detour detected: hop {prev.hop}→{curr.hop} spans {dist:.0f}km")
 
         return alerts
 
@@ -227,13 +224,13 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 def is_private_ip(ip: str) -> bool:
     """
     Check if IP is private/non-routable.
-    
+
     Includes:
     - RFC1918 private ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
     - Loopback (127.0.0.0/8)
     - Link-local (169.254.0.0/16)
     - **CGNAT range (100.64.0.0/10)** - Carrier-Grade NAT
-    
+
     CGNAT addresses are used by ISPs for large-scale NAT and are not
     publicly routable. GeoIP APIs do not have data for these addresses.
     """
@@ -241,17 +238,17 @@ def is_private_ip(ip: str) -> bool:
 
     try:
         addr = ipaddress.ip_address(ip)
-        
+
         # Standard private/loopback/link-local check
         if addr.is_private or addr.is_loopback or addr.is_link_local:
             return True
-        
+
         # CGNAT range check (100.64.0.0/10)
         # Carrier-Grade NAT - RFC 6598
-        cgnat = ipaddress.ip_network('100.64.0.0/10')
+        cgnat = ipaddress.ip_network("100.64.0.0/10")
         if addr in cgnat:
             return True
-            
+
         return False
     except ValueError:
         return False
