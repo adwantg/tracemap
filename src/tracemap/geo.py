@@ -8,6 +8,7 @@ Provides:
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -36,49 +37,79 @@ class MockGeoLocator:
     # Some well-known IPs with realistic locations for demos
     KNOWN_IPS = {
         "8.8.8.8": HopGeo(
-            lat=37.4056, lon=-122.0775, city="Mountain View", country="United States",
-            country_code="US", asn=15169, asn_org="GOOGLE"
+            lat=37.4056,
+            lon=-122.0775,
+            city="Mountain View",
+            country="United States",
+            country_code="US",
+            asn=15169,
+            asn_org="GOOGLE",
         ),
         "8.8.4.4": HopGeo(
-            lat=37.4056, lon=-122.0775, city="Mountain View", country="United States",
-            country_code="US", asn=15169, asn_org="GOOGLE"
+            lat=37.4056,
+            lon=-122.0775,
+            city="Mountain View",
+            country="United States",
+            country_code="US",
+            asn=15169,
+            asn_org="GOOGLE",
         ),
         "1.1.1.1": HopGeo(
-            lat=-33.8688, lon=151.2093, city="Sydney", country="Australia",
-            country_code="AU", asn=13335, asn_org="CLOUDFLARENET"
+            lat=-33.8688,
+            lon=151.2093,
+            city="Sydney",
+            country="Australia",
+            country_code="AU",
+            asn=13335,
+            asn_org="CLOUDFLARENET",
         ),
         "1.0.0.1": HopGeo(
-            lat=-33.8688, lon=151.2093, city="Sydney", country="Australia",
-            country_code="AU", asn=13335, asn_org="CLOUDFLARENET"
+            lat=-33.8688,
+            lon=151.2093,
+            city="Sydney",
+            country="Australia",
+            country_code="AU",
+            asn=13335,
+            asn_org="CLOUDFLARENET",
         ),
         "208.67.222.222": HopGeo(
-            lat=37.7749, lon=-122.4194, city="San Francisco", country="United States",
-            country_code="US", asn=36692, asn_org="OPENDNS"
+            lat=37.7749,
+            lon=-122.4194,
+            city="San Francisco",
+            country="United States",
+            country_code="US",
+            asn=36692,
+            asn_org="OPENDNS",
         ),
         "9.9.9.9": HopGeo(
-            lat=47.6062, lon=-122.3321, city="Seattle", country="United States",
-            country_code="US", asn=19281, asn_org="QUAD9"
+            lat=47.6062,
+            lon=-122.3321,
+            city="Seattle",
+            country="United States",
+            country_code="US",
+            asn=19281,
+            asn_org="QUAD9",
         ),
     }
 
     # Major internet exchange/hub cities for more realistic routing
     HUB_CITIES = [
-        (40.7128, -74.0060, "New York", "US"),        # NYC
-        (51.5074, -0.1278, "London", "GB"),           # London
-        (52.5200, 13.4050, "Berlin", "DE"),           # Berlin
-        (48.8566, 2.3522, "Paris", "FR"),             # Paris
-        (35.6762, 139.6503, "Tokyo", "JP"),           # Tokyo
-        (37.5665, 126.9780, "Seoul", "KR"),           # Seoul
-        (22.3193, 114.1694, "Hong Kong", "HK"),       # Hong Kong
-        (1.3521, 103.8198, "Singapore", "SG"),        # Singapore
-        (-33.8688, 151.2093, "Sydney", "AU"),         # Sydney
+        (40.7128, -74.0060, "New York", "US"),  # NYC
+        (51.5074, -0.1278, "London", "GB"),  # London
+        (52.5200, 13.4050, "Berlin", "DE"),  # Berlin
+        (48.8566, 2.3522, "Paris", "FR"),  # Paris
+        (35.6762, 139.6503, "Tokyo", "JP"),  # Tokyo
+        (37.5665, 126.9780, "Seoul", "KR"),  # Seoul
+        (22.3193, 114.1694, "Hong Kong", "HK"),  # Hong Kong
+        (1.3521, 103.8198, "Singapore", "SG"),  # Singapore
+        (-33.8688, 151.2093, "Sydney", "AU"),  # Sydney
         (37.7749, -122.4194, "San Francisco", "US"),  # SF
-        (47.6062, -122.3321, "Seattle", "US"),        # Seattle
-        (33.7490, -84.3880, "Atlanta", "US"),         # Atlanta
-        (41.8781, -87.6298, "Chicago", "US"),         # Chicago
-        (25.7617, -80.1918, "Miami", "US"),           # Miami
-        (55.7558, 37.6173, "Moscow", "RU"),           # Moscow
-        (-23.5505, -46.6333, "São Paulo", "BR"),      # São Paulo
+        (47.6062, -122.3321, "Seattle", "US"),  # Seattle
+        (33.7490, -84.3880, "Atlanta", "US"),  # Atlanta
+        (41.8781, -87.6298, "Chicago", "US"),  # Chicago
+        (25.7617, -80.1918, "Miami", "US"),  # Miami
+        (55.7558, 37.6173, "Moscow", "RU"),  # Moscow
+        (-23.5505, -46.6333, "São Paulo", "BR"),  # São Paulo
     ]
 
     def locate(self, ip: str) -> Optional[HopGeo]:
@@ -154,7 +185,7 @@ class MaxMindGeoLocator:
         region = None
         subs = rec.get("subdivisions") or []
         if subs:
-            region = ((subs[0].get("names") or {}).get("en"))
+            region = (subs[0].get("names") or {}).get("en")
 
         return HopGeo(
             lat=float(lat),

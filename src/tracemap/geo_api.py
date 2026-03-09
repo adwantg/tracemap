@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Optional
+from typing import Any, Optional, TYPE_CHECKING
 from urllib.error import URLError
 from urllib.request import urlopen
 
@@ -268,6 +268,7 @@ class ResilientAPILocator:
         self.use_cache = use_cache
 
         # Initialize cache if enabled
+        self.cache: Any = None
         if use_cache:
             from .cache import GeoCache
 
@@ -353,8 +354,8 @@ class HybridGeoLocator:
 
     def __init__(
         self,
-        local_locator: Optional[object] = None,
-        api_locator: Optional[object] = None,
+        local_locator: Any = None,
+        api_locator: Any = None,
         fallback_to_mock: bool = True,
         verbose: bool = False,
     ):
@@ -375,7 +376,7 @@ class HybridGeoLocator:
         if fallback_to_mock:
             from .geo import MockGeoLocator
 
-            self.mock_locator = MockGeoLocator()
+            self.mock_locator: Any = MockGeoLocator()
         else:
             self.mock_locator = None
 

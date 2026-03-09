@@ -311,7 +311,7 @@ class DNSCache:
 
             if row:
                 self.stats.hits += 1
-                return row[0]
+                return str(row[0])
 
             self.stats.misses += 1
             return None

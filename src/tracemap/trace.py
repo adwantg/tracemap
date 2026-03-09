@@ -75,7 +75,7 @@ def resolve_host(host: str) -> Tuple[str, Optional[str]]:
         # Try IPv4 first
         info = socket.getaddrinfo(host, None, socket.AF_INET)
         if info:
-            return info[0][4][0], "ipv4"
+            return str(info[0][4][0]), "ipv4"
     except socket.gaierror:
         pass
 
@@ -83,7 +83,7 @@ def resolve_host(host: str) -> Tuple[str, Optional[str]]:
         # Try IPv6
         info = socket.getaddrinfo(host, None, socket.AF_INET6)
         if info:
-            return info[0][4][0], "ipv6"
+            return str(info[0][4][0]), "ipv6"
     except socket.gaierror:
         pass
 

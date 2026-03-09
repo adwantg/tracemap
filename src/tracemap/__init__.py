@@ -1,6 +1,6 @@
 import importlib.metadata
 
-__all__ = ['__version__']
+__all__ = ["__version__"]
 
 try:
     __version__ = importlib.metadata.version("tracemap")

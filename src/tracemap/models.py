@@ -47,7 +47,7 @@ class Hop(BaseModel):
     is_private: bool = False  # RFC1918 private IP
     is_timeout: bool = False  # All probes timed out
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def loss_pct(self) -> float:
         """Packet loss percentage."""
@@ -56,7 +56,7 @@ class Hop(BaseModel):
         lost = sum(1 for p in self.probes if not p.ok)
         return 100.0 * lost / len(self.probes)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def rtt_avg_ms(self) -> Optional[float]:
         """Average RTT in milliseconds."""
@@ -65,7 +65,7 @@ class Hop(BaseModel):
             return None
         return sum(vals) / len(vals)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def rtt_min_ms(self) -> Optional[float]:
         """Minimum RTT in milliseconds."""
@@ -74,7 +74,7 @@ class Hop(BaseModel):
             return None
         return min(vals)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def rtt_max_ms(self) -> Optional[float]:
         """Maximum RTT in milliseconds."""
@@ -83,7 +83,7 @@ class Hop(BaseModel):
             return None
         return max(vals)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def jitter_ms(self) -> Optional[float]:
         """Jitter (standard deviation of RTT) in milliseconds."""
@@ -145,25 +145,25 @@ class TraceRun(BaseModel):
     meta: TraceMeta
     hops: List[Hop] = Field(default_factory=list)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def total_hops(self) -> int:
         """Total number of hops."""
         return len(self.hops)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def responded_hops(self) -> int:
         """Number of hops that responded (not timeout)."""
         return sum(1 for h in self.hops if not h.is_timeout and h.ip)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def timeout_hops(self) -> int:
         """Number of hops that timed out."""
         return sum(1 for h in self.hops if h.is_timeout)
 
-    @computed_field  # type: ignore[misc]
+    @computed_field
     @property
     def avg_loss_pct(self) -> float:
         """Average packet loss across all hops."""

@@ -3,6 +3,7 @@ Reverse DNS resolution with caching and async support.
 
 Author: gadwant
 """
+
 from __future__ import annotations
 
 import asyncio
