@@ -6,7 +6,7 @@ authors:
     alias: "gadwant"
 title: "tracemap: A modern traceroute visualizer for the terminal"
 version: "1.0.0"
-date-released: "2026-03-08"
+date-released: "2026-03-09"
 url: "https://github.com/adwantg/tracemap"
 repository-code: "https://github.com/adwantg/tracemap"
 license: MIT

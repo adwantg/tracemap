@@ -65,7 +65,7 @@ def _pick_geolocator(
 
             console.print("[green]Using real-time API geo lookup (ip-api.com)[/green]")
             console.print("[dim]No setup required! Getting real locations...[/dim]")
-            return get_best_locator(
+            return get_best_locator(  # type: ignore[return-value]
                 mmdb_path=str(mmdb_path) if mmdb_path else None,
                 prefer_api=True,
             )

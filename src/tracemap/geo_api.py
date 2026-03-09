@@ -10,9 +10,13 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 from urllib.error import URLError
 from urllib.request import urlopen
+
+if TYPE_CHECKING:
+    from .cache import GeoCache
+    from .geo import MockGeoLocator
 
 from .models import HopGeo
 
@@ -268,7 +272,7 @@ class ResilientAPILocator:
         self.use_cache = use_cache
 
         # Initialize cache if enabled
-        self.cache: Any = None
+        self.cache: Optional["GeoCache"] = None
         if use_cache:
             from .cache import GeoCache
 
@@ -307,7 +311,8 @@ class ResilientAPILocator:
         # Try API providers
         for provider_name, provider in self.providers:
             try:
-                result = provider.locate(ip)
+                # provider is Any, so result is Any. We cast it when returning.
+                result = provider.locate(ip)  # type: ignore[attr-defined]
 
                 if result:
                     self._success_count[provider_name] += 1
@@ -320,7 +325,7 @@ class ResilientAPILocator:
                         confidence = "high" if provider_name == "ip-api.com" else "medium"
                         self.cache.set(ip, result, source=provider_name, confidence=confidence)
 
-                    return result
+                    return result  # type: ignore[no-any-return]
                 else:
                     self._failure_count[provider_name] += 1
 
@@ -376,12 +381,12 @@ class HybridGeoLocator:
         if fallback_to_mock:
             from .geo import MockGeoLocator
 
-            self.mock_locator: Any = MockGeoLocator()
+            self.mock_locator: Optional["MockGeoLocator"] = MockGeoLocator()
         else:
             self.mock_locator = None
 
         # Track stats
-        self._stats = {
+        self._stats: dict[str, Any] = {
             "local_hits": 0,
             "api_hits": 0,
             "mock_hits": 0,
@@ -398,7 +403,7 @@ class HybridGeoLocator:
                 result = self.local_locator.locate(ip)
                 if result:
                     self._stats["local_hits"] += 1
-                    return result
+                    return result  # type: ignore[no-any-return]
             except Exception as e:
                 if self.verbose:
                     print(f"  Local database error: {e}")

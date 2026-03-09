@@ -1,6 +1,6 @@
 import socket
 
-import dns.resolver
+import dns.resolver  # type: ignore[import-not-found]
 from rich.console import Console
 
 
@@ -19,7 +19,9 @@ def check_dns_consistency(host: str, console: Console) -> None:
         "Quad9 (9.9.9.9)": "9.9.9.9",
     }
 
-    results = {}
+    from typing import Any
+
+    results: dict[str, Any] = {}
 
     for name, ip in resolvers.items():
         try:
@@ -34,12 +36,12 @@ def check_dns_consistency(host: str, console: Console) -> None:
                 # System resolver
                 # Use socket.getaddrinfo to get all IPs
                 answers = socket.getaddrinfo(host, None, socket.AF_INET)
-                ips = sorted(list(set([a[4][0] for a in answers])))
+                ips = sorted(list(set([str(a[4][0]) for a in answers])))
 
             results[name] = ips
 
         except Exception as e:
-            results[name] = f"Error: {e}"
+            results[name] = [f"Error: {e}"]
 
     # Display results
     from rich.table import Table

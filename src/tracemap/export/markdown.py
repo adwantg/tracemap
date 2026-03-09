@@ -30,7 +30,12 @@ def export_markdown(trace: TraceRun, output_path: Path):
     lines.append(f"# Traceroute Report: {trace.meta.host}")
     lines.append("")
     lines.append(f"**Date**: {trace.meta.started_at.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-    lines.append(f"**Duration**: {trace.meta.duration_ms / 1000:.1f}s")
+    duration_s = (
+        (trace.meta.completed_at - trace.meta.started_at).total_seconds()
+        if trace.meta.completed_at
+        else 0.0
+    )
+    lines.append(f"**Duration**: {duration_s:.1f}s")
     lines.append(f"**Hops**: {trace.total_hops} ({trace.responded_hops} responded)")
     lines.append(f"**Protocol**: {trace.meta.protocol.upper()}")
 
