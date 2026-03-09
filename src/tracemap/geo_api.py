@@ -26,6 +26,11 @@ class IPApiGeoLocator:
     - Includes latitude, longitude, city, country, ASN
     - High accuracy for most IPs
     
+    Privacy Note:
+    - Uses plain HTTP (ip-api.com requires Pro tier for HTTPS). 
+    - IP lookups are transmitted in plaintext. 
+    - Disable API mode or switch profiles if strict privacy is needed.
+    
     Rate Limits:
     - Free: 45 requests/minute
     - Pro: unlimited (requires API key)
@@ -467,7 +472,7 @@ def get_best_locator(
     
     # Build hybrid locator
     return HybridGeoLocator(
-        local_locator=local_locator if not prefer_api else None,
+        local_locator=local_locator,
         api_locator=api_locator,
         fallback_to_mock=True,
         verbose=verbose,

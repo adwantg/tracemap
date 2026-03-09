@@ -112,11 +112,11 @@ def _build_cmd(cfg: TraceConfig, binary: str) -> List[str]:
 
     # Timeout per probe
     if is_macos:
-        # macOS uses -w for wait time (seconds, can be float)
-        cmd.extend(["-w", str(int(cfg.timeout_s))])
+        # macOS uses -w for wait time (ms usually, but we use float matching seconds per standard spec docs)
+        cmd.extend(["-w", str(cfg.timeout_s)])
     else:
         # Linux uses -w for wait time (seconds)
-        cmd.extend(["-w", str(int(cfg.timeout_s))])
+        cmd.extend(["-w", str(cfg.timeout_s)])
 
     # Protocol selection
     if cfg.protocol == Protocol.ICMP:
@@ -158,7 +158,7 @@ def _build_cmd(cfg: TraceConfig, binary: str) -> List[str]:
 _IPV4_PATTERN = r"(?P<ip>\d{1,3}(?:\.\d{1,3}){3})"
 
 # IPv6: 2001:db8::1 or ::1 or fe80::1%eth0
-_IPV6_PATTERN = r"(?P<ip6>(?:[0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|::(?:[0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}::(?:[0-9a-fA-F]{1,4}:){0,4}[0-9a-fA-F]{1,4})"
+_IPV6_PATTERN = r"(?P<ip6>(?:[a-fA-F0-9]{1,4}::?)+[a-fA-F0-9:]{1,30}|::(?:[a-fA-F0-9]{1,4}:){0,5}[a-fA-F0-9]{1,4})"
 
 # RTT value: 10.123 ms or 10.123ms
 _RTT_PATTERN = r"(?P<rtt>\d+(?:\.\d+)?)\s*ms"

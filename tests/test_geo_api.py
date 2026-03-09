@@ -107,7 +107,7 @@ class TestResilientAPILocator:
 
     def test_primary_success(self):
         """Test that primary API is used when working."""
-        locator = ResilientAPILocator()
+        locator = ResilientAPILocator(use_cache=False)
         
         # Mock primary provider to succeed
         mock_result = HopGeo(lat=37.4, lon=-122.1, city="Test City")
@@ -121,7 +121,7 @@ class TestResilientAPILocator:
 
     def test_fallback_to_secondary(self):
         """Test fallback when primary API fails."""
-        locator = ResilientAPILocator()
+        locator = ResilientAPILocator(use_cache=False)
         
         # Mock primary to fail, secondary to succeed
         locator.providers[0] = ("ip-api.com", MagicMock(locate=MagicMock(return_value=None)))
@@ -136,7 +136,7 @@ class TestResilientAPILocator:
 
     def test_all_providers_fail(self):
         """Test when all providers fail."""
-        locator = ResilientAPILocator()
+        locator = ResilientAPILocator(use_cache=False)
         
         # Mock all to fail
         locator.providers[0] = ("ip-api.com", MagicMock(locate=MagicMock(return_value=None)))
@@ -150,7 +150,7 @@ class TestResilientAPILocator:
 
     def test_stats_tracking(self):
         """Test statistics tracking."""
-        locator = ResilientAPILocator()
+        locator = ResilientAPILocator(use_cache=False)
         
         # Mock some successes and failures
         mock_result = HopGeo(lat=37.4, lon=-122.1)

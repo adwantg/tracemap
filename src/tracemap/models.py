@@ -32,6 +32,7 @@ class HopProbe(BaseModel):
 
     rtt_ms: Optional[float] = None
     ok: bool = True
+    ip: Optional[str] = None
 
 
 class Hop(BaseModel):
@@ -123,7 +124,7 @@ class TraceMeta(BaseModel):
     """Metadata about a trace run."""
 
     tool: str = "tracemap"
-    version: str = "0.1.0"
+    version: str = Field(default_factory=lambda: __import__('tracemap').__version__)
     host: str
     resolved_ip: Optional[str] = None
     max_hops: int

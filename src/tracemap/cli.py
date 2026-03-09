@@ -263,13 +263,9 @@ def trace(
         probes=probes,
         protocol=proto,
         resolve_hostnames=resolve_hostnames,
-        # TODO: Add source binding to TraceConfig
+        source_interface=source_interface,
+        source_port=source_port,
     )
-    # Monkey-patch config for now until we update TraceConfig model
-    if source_interface:
-        cfg.source_interface = source_interface
-    if source_port:
-        cfg.source_port = source_port
 
     # Use ASCII map mode if requested, otherwise use clean table mode
     trace_result = run_traceroute(cfg, geoloc, live_render=not no_live, render_map=show_map)
@@ -516,29 +512,6 @@ def stats(
         for alert in alerts:
             console.print(f"  [yellow]⚠️ {alert}[/yellow]")
 
-
-def _redact_trace(trace: TraceRun) -> TraceRun:
-    """
-    Redact IP addresses in a trace for privacy.
-
-    Replaces IPs with hashed versions while preserving geo info.
-    """
-    import hashlib
-
-    def redact_ip(ip: Optional[str]) -> Optional[str]:
-        if ip is None:
-            return None
-        h = hashlib.sha256(ip.encode()).hexdigest()[:12]
-        return f"[redacted:{h}]"
-
-    # Create a copy with redacted IPs
-    data = trace.model_dump(mode="json")
-
-    for hop in data.get("hops", []):
-        hop["ip"] = redact_ip(hop.get("ip"))
-        hop["hostname"] = None  # Remove hostnames too
-
-    return TraceRun.model_validate(data)
 
 
 
