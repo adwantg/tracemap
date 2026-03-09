@@ -1,2 +1,8 @@
+import importlib.metadata
+
 __all__ = ['__version__']
-__version__ = '0.1.0'
+
+try:
+    __version__ = importlib.metadata.version("tracemap")
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "unknown"

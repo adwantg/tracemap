@@ -85,7 +85,7 @@ site/
 
 # Internal documentation (keep only README.md for open source)
 *.md
-!README.md
+!/*.md
 !CHANGELOG.md
 !LICENSE.md
 !QUICKSTART.md

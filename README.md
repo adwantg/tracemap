@@ -189,6 +189,10 @@ pip install 'tracemap[asn]'
 
 # All optional features
 pip install 'tracemap[all]'
+
+# For development (includes pytest etc)
+pip install -e '.[dev]'
+python -m pytest
 ```
 
 ### Your First Trace
@@ -486,7 +490,7 @@ q: Quit | ↑/↓: Navigate | Enter: Details | e: Export HTML
 
 ---
 
-## 🆕 New in v0.3.0 (✅ All Implemented)
+## 🆕 New in v1.0.0 (✅ All Implemented)
 
 > **Status Legend**: ✅ Implemented | 🧪 Experimental | 🧭 Planned
 
@@ -722,7 +726,7 @@ Traces are saved in a structured JSON format for easy processing:
 {
   "meta": {
     "tool": "tracemap",
-    "version": "0.3.0",
+    "version": "1.0.0",
     "host": "google.com",
     "resolved_ip": "142.250.185.46",
     "protocol": "udp",
@@ -872,13 +876,13 @@ src/tracemap/
 ├── asn.py              # ASN resolvers (Team Cymru, PyASN)
 ├── dns.py              # Reverse DNS lookup with caching
 ├── render.py           # ASCII/tables rendering
-├── profiles.py         # Privacy/offline profiles ⚡ NEW v0.3.0
+├── profiles.py         # Privacy/offline profiles ⚡ NEW v1.0.0
 │
-├── cache/              # Persistent caching (SQLite) ⚡ NEW v0.3.0
+├── cache/              # Persistent caching (SQLite) ⚡ NEW v1.0.0
 │   ├── __init__.py
 │   └── sqlite.py       # 30d/90d/24h TTLs
 │
-├── watch/              # Continuous monitoring ⚡ NEW v0.3.0
+├── watch/              # Continuous monitoring ⚡ NEW v1.0.0
 │   ├── __init__.py
 │   ├── monitor.py      # TraceMonitor with rolling stats
 │   └── alerts.py       # Anomaly detection
@@ -891,13 +895,13 @@ src/tracemap/
 │   ├── __init__.py
 │   ├── html.py         # Leaflet.js interactive maps
 │   ├── svg.py          # SVG static diagrams
-│   └── markdown.py     # Incident reports ⚡ NEW v0.3.0
+│   └── markdown.py     # Incident reports ⚡ NEW v1.0.0
 │
-├── analysis/           # Confidence scoring ⚡ NEW v0.3.0
+├── analysis/           # Confidence scoring ⚡ NEW v1.0.0
 │   ├── __init__.py
 │   └── confidence.py   # Geo confidence & plausibility checks
 │
-└── probing/            # Advanced probing ⚡ NEW v0.3.0
+└── probing/            # Advanced probing ⚡ NEW v1.0.0
     ├── __init__.py
     └── paris.py        # Paris traceroute & ECMP detection
 ```
@@ -929,7 +933,7 @@ Contributions welcome! Priority areas:
 - [ ] Source IP binding (`--source` flag)
 - [ ] Custom probe payloads
 
-**Already Implemented** (v0.3.0):
+**Already Implemented** (v1.0.0):
 - ✅ Watch mode for continuous monitoring
 - ✅ ECMP detection via Paris traceroute
 - ✅ Persistent caching

@@ -8,7 +8,7 @@ Author: gadwant
 import pytest
 
 from tracemap.analysis import ConfidenceScorer
-from tracemap.models import Hop, HopGeo
+from tracemap.models import Hop, HopGeo, HopProbe
 
 
 class TestConfidenceScorer:
@@ -97,13 +97,13 @@ class TestConfidenceScorer:
         hop1 = Hop(
             hop=1,
             ip="1.1.1.1",
-            rtt_avg_ms=10.0,
+            probes=[HopProbe(rtt_ms=10.0, ok=True)],
             geo=HopGeo(lat=37.7749, lon=-122.4194)  # SF
         )
         hop2 = Hop(
             hop=2,
             ip="2.2.2.2",
-            rtt_avg_ms=15.0,  # 5ms delta
+            probes=[HopProbe(rtt_ms=15.0, ok=True)],
             geo=HopGeo(lat=37.3382, lon=-121.8863)  # San Jose (~70km)
         )
         
@@ -118,13 +118,13 @@ class TestConfidenceScorer:
         hop1 = Hop(
             hop=1,
             ip="1.1.1.1",
-            rtt_avg_ms=10.0,
+            probes=[HopProbe(rtt_ms=10.0, ok=True)],
             geo=HopGeo(lat=37.7749, lon=-122.4194)  # SF
         )
         hop2 = Hop(
             hop=2,
             ip="2.2.2.2",
-            rtt_avg_ms=10.1,  # Only 0.1ms delta
+            probes=[HopProbe(rtt_ms=10.1, ok=True)],
             geo=HopGeo(lat=35.6762, lon=139.6503)  # Tokyo (9000km away)
         )
         

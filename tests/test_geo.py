@@ -5,8 +5,9 @@ Author: gadwant
 """
 import pytest
 
-from tracemap.geo import MockGeoLocator, is_private_ip
-from tracemap.models import is_private_ip as model_is_private
+from tracemap.geo import MockGeoLocator
+from tracemap.models import is_private_ip
+
 
 
 class TestMockGeoLocator:

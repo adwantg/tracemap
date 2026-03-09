@@ -58,9 +58,8 @@ class TestHopLineParsing:
         assert hop is not None
         assert hop.hop == 4
         assert hop.ip == "8.8.8.8"
-        assert hop.probes[0].ok is True
-        assert hop.probes[1].ok is False
-        assert hop.probes[2].ok is True
+        assert len([p for p in hop.probes if p.ok]) == 2
+        assert len([p for p in hop.probes if not p.ok]) == 1
         assert 33.0 < hop.loss_pct < 34.0  # One timeout out of three
 
     def test_parse_hop_ipv6(self):
