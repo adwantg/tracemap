@@ -111,4 +111,5 @@ NOTES.md
 scripts/debug*.py
 scripts/test*.py
 codacy_issues.json
+release.sh
 
