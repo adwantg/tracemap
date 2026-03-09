@@ -87,7 +87,7 @@ class TeamCymruResolver:
             query = f"{reversed_ip}.origin.asn.cymru.com"
 
             # Get TXT record
-            import dns.resolver
+            import dns.resolver  # type: ignore[import-not-found, import-untyped]
 
             answers = dns.resolver.resolve(query, "TXT")
 
@@ -120,7 +120,7 @@ class TeamCymruResolver:
     def _lookup_asn_name(self, asn: int) -> Optional[str]:
         """Look up the organization name for an ASN."""
         try:
-            import dns.resolver
+            import dns.resolver  # type: ignore[import-not-found, import-untyped]
 
             query = f"AS{asn}.asn.cymru.com"
             answers = dns.resolver.resolve(query, "TXT")

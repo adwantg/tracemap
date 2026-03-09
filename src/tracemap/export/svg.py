@@ -274,8 +274,8 @@ def generate_svg(
             )
 
             svg_points = []
-            for lat, lon in arc_points:
-                x, y = _project_equirectangular(lat, lon, width, height, padding)
+            for p_lat, p_lon in arc_points:
+                x, y = _project_equirectangular(p_lat, p_lon, width, height, padding)
                 svg_points.append(f"{x:.1f},{y:.1f}")
 
             svg_parts.append(

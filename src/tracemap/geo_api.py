@@ -10,9 +10,13 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Any, Optional, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 from urllib.error import URLError
 from urllib.request import urlopen
+
+if TYPE_CHECKING:
+    from .cache import GeoCache
+    from .geo import MockGeoLocator
 
 from .models import HopGeo
 
@@ -268,7 +272,7 @@ class ResilientAPILocator:
         self.use_cache = use_cache
 
         # Initialize cache if enabled
-        self.cache: Any = None
+        self.cache: Optional["GeoCache"] = None
         if use_cache:
             from .cache import GeoCache
 
@@ -376,7 +380,7 @@ class HybridGeoLocator:
         if fallback_to_mock:
             from .geo import MockGeoLocator
 
-            self.mock_locator: Any = MockGeoLocator()
+            self.mock_locator: Optional["MockGeoLocator"] = MockGeoLocator()
         else:
             self.mock_locator = None
 
@@ -427,7 +431,8 @@ class HybridGeoLocator:
 
         # Add API provider stats if available
         if hasattr(self.api_locator, "get_stats"):
-            stats["api_providers"] = self.api_locator.get_stats()
+            api_stats = self.api_locator.get_stats()  # type: ignore[attr-defined]
+            stats["api_providers"] = api_stats
 
         return stats
 
