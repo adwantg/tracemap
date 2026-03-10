@@ -11,10 +11,10 @@ Table-first output like MTR, with replay/diff workflows for SREs, and beautiful 
 ## 📸 Screenshots
 
 ### Interactive HTML Map Export
-![HTML Map - Interactive Leaflet.js with hop markers and RTT color coding](docs/screenshots/html_map.png)
+![HTML Map - Interactive Leaflet.js with hop markers and RTT color coding](https://raw.githubusercontent.com/adwantg/tracemap/main/docs/screenshots/html_map.png)
 
 ### Terminal TUI
-![TUI Interface - Live terminal UI with map, hop table, and metadata](docs/screenshots/tui.png)
+![TUI Interface - Live terminal UI with map, hop table, and metadata](https://raw.githubusercontent.com/adwantg/tracemap/main/docs/screenshots/tui.png)
 
 ---
 

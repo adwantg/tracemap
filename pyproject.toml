@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tracemap"
-version = "1.0.0"
+version = "1.0.1"
 description = "Modern traceroute visualizer for the terminal with TUI, interactive HTML maps, and ASN/GeoIP lookups."
 readme = "README.md"
 requires-python = ">=3.10"
